@@ -13,6 +13,12 @@ struct Pixel {
     Coordinate coordinate;
 }
 
+struct PixelToPaint {
+    string color;
+    uint256 offer;
+    Coordinate coordinate;
+}
+
 contract Painting {
     uint256 constant _axisMaxSize = 1000;
     uint256 constant _baseValue = 1 wei;
@@ -49,10 +55,11 @@ contract Painting {
         return _pixels[pixelPosition - 1];
     }
 
-    function _paint(Coordinate memory coordinate, string memory color)
-        public
-        payable
-    {
+    function _paint(
+        Coordinate memory coordinate,
+        string memory color,
+        uint256 offer
+    ) internal {
         require(
             coordinate.x < _axisMaxSize && coordinate.y < _axisMaxSize,
             "Coordinates out of range"
@@ -63,32 +70,47 @@ contract Painting {
 
         if (pixelPosition > 0) {
             uint256 pixelIndex = pixelPosition - 1;
-
-            require(
-                msg.value > _pixels[pixelIndex].value,
-                "Not enough funds to paint pixel"
-            );
-
             address receiver = _pixels[pixelIndex].owner;
 
             _pixels[pixelIndex].color = color;
             _pixels[pixelIndex].owner = payable(msg.sender);
-            _pixels[pixelIndex].value = msg.value + _baseValue;
+            _pixels[pixelIndex].value = offer + _baseValue;
 
-            payable(receiver).transfer(msg.value);
+            payable(receiver).transfer(offer);
         } else {
-            require(msg.value > _baseValue, "Not enough funds to paint pixel");
-
             Pixel memory pixelToAdd = Pixel(
                 color,
                 payable(msg.sender),
-                msg.value + _baseValue,
+                offer + _baseValue,
                 coordinate
             );
 
             _pixelPosition[pixelId] = _pixels.length + 1;
             _pixels.push(pixelToAdd);
         }
+    }
+
+    function _paintPixels(PixelToPaint[] memory pixels) public payable {
+        require(_canAfford(pixels, msg.value), "Not enought funds");
+
+        for (uint256 i = 0; i < pixels.length; i++) {
+            _paint(pixels[i].coordinate, pixels[i].color, pixels[i].offer);
+        }
+    }
+
+    function _canAfford(PixelToPaint[] memory pixels, uint256 offer)
+        public
+        view
+        virtual
+        returns (bool)
+    {
+        uint256 totalOffer = 0;
+
+        for (uint256 i = 0; i < pixels.length; i++) {
+            totalOffer += pixels[i].offer;
+        }
+
+        return offer >= totalOffer;
     }
 
     function _getPixels() public view virtual returns (Pixel[] memory) {

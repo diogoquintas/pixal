@@ -4,8 +4,9 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
     "preact": "^10.5.14",
-    "preact-compat": "^3.19.0",
     "web3": "^1.5.2"
   },
   "devDependencies": {
@@ -18,5 +19,9 @@
   },
   "eslintConfig": {
     "extends": "preact"
+  },
+  "alias": {
+    "react": "preact/compat",
+    "react-dom": "preact/compat"
   }
 }

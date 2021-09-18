@@ -1,7 +1,11 @@
 import Web3 from "../../node_modules/web3/dist/web3.min.js";
 import contractData from "../../../build/contracts/Painting.json";
+import { getPixels } from "./getPixels.js";
+import { firstDraw, savePoint } from "../app.js";
+import { storageGetPoints } from "../storage/pointsStorage.js";
 
-const CONTRACT_ADDRESS = "0xa893cdF112F797648a425C591A1Bcdf482A82FF0";
+const CONTRACT_ADDRESS = "0x362329EE1C42DbAd0d192802739b25341D56dAca";
+
 export const BASE_VALUE = 1;
 
 function loadWeb3() {
@@ -30,28 +34,32 @@ export async function loadAccount() {
   }
 }
 
-export async function loadBoard(callback) {
-  const timeout = setTimeout(() => {
-    callback([]);
-  }, 10000);
-  const pixels = await window.contract.methods._getPixels().call();
+function loadStoragePoints() {
+  const storagePoints = storageGetPoints();
 
-  clearTimeout(timeout);
-  callback(pixels);
+  Object.entries(storagePoints).forEach(([id, color]) => {
+    const [x, y] = id.split("-");
+
+    savePoint({ x: Number(x), y: Number(y), color, size: 1, addToBag: false });
+  });
 }
 
-export default async function load(callback) {
+export default async function load() {
   loadWeb3();
 
   try {
     await loadContract();
-  } catch (e) {
-    console.log(e);
+  } catch {
+    alert(
+      "error reading blockchain data, make sure you're correctly connected to a wallet"
+    );
   }
 
   try {
-    await loadBoard(callback);
-  } catch (e) {
-    console.log(e);
+    await getPixels();
+    firstDraw();
+    loadStoragePoints();
+  } catch {
+    alert("error on fetching pixels");
   }
 }

@@ -4,8 +4,9 @@ import {
   handleTouchStart,
   handleTouchMove,
 } from "./events/touch";
-import { resizeCanvas } from "./events/resize";
 import loadBlockchain from "./blockchain/load";
+import { storageDeletePoint, storageSavePont } from "./storage/pointsStorage";
+import { loadCanvas } from "./canvas/load";
 
 window.canvas = document.querySelector("canvas");
 window.hiddenCanvas = document.createElement("canvas");
@@ -19,17 +20,17 @@ window.position = {
   mouseY: 0,
   xMin: 0,
   yMin: 0,
+  minZoom: 1,
+  maxZoom: 500,
 };
-window.savedPoints = {};
+window.queuedPoints = {};
 window.savePointsTimeoutId;
+window.pixels = [];
+window.pixelsById = {};
 
-const image = document.createElement('img');
-const BOARD_SIZE = 1000;
-const MIN_ZOOM = 1;
-const MAX_ZOOM = 500;
+export const BOARD_SIZE = 1000;
+const image = document.createElement("img");
 const SAVE_POINTS_TIMER = 1000;
-
-let queuedPoints = {};
 
 function paintPoint({
   x,
@@ -48,9 +49,17 @@ function paintPoint({
     zoomAmount * size,
     zoomAmount * size
   );
+
+  context.strokeStyle = color;
+  context.strokeRect(
+    x - sizeOffset,
+    y - sizeOffset,
+    zoomAmount * size,
+    zoomAmount * size
+  );
 }
 
-function savePoint({ x, y, color, size }) {
+export function savePoint({ x, y, color, size, addToBag = true }) {
   const ctx = window.hiddenCanvasCtx;
 
   for (let xItenerator = 0; xItenerator < size; xItenerator++) {
@@ -59,46 +68,31 @@ function savePoint({ x, y, color, size }) {
       const pointY = Math.floor(y + yItenerator);
 
       if (pointX < BOARD_SIZE && pointY < BOARD_SIZE) {
-        window.savedPoints[`${pointX}-${pointY}`] = color;
-        queuedPoints[`${pointX}-${pointY}`] = color;
+        const id = `${pointX}-${pointY}`;
+
+        if (addToBag) {
+          storageSavePont(id, color);
+        }
+
+        window.queuedPoints[id] = color;
 
         ctx.fillStyle = color;
         ctx.fillRect(pointX, pointY, 1, 1);
       }
     }
   }
-
-  setTimeoutToSavePoints();
 }
 
 function draw() {
   const canvas = window.canvas;
   const ctx = window.canvasCtx;
-  const { zoom, xMin, yMin } = window.position;
+  const { zoom, xMin, yMin, xOffset, yOffset } = window.position;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  ctx.strokeStyle = "white";
-  ctx.strokeRect(
-    (0 - xMin) * zoom,
-    (0 - yMin) * zoom,
-    BOARD_SIZE * zoom,
-    BOARD_SIZE * zoom
-  );
+  ctx.drawImage(image, xOffset, yOffset, BOARD_SIZE * zoom, BOARD_SIZE * zoom);
 
-  ctx.drawImage(
-    image,
-    xMin,
-    yMin,
-    canvas.width / zoom,
-    canvas.height / zoom,
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  );
-
-  for (const [id, color] of Object.entries(queuedPoints)) {
+  for (const [id, color] of Object.entries(window.queuedPoints)) {
     const [x, y] = id.split("-");
 
     paintPoint({
@@ -114,7 +108,7 @@ function draw() {
 
 function saveImage() {
   image.src = window.hiddenCanvas.toDataURL();
-  queuedPoints = {};
+  window.queuedPoints = {};
 }
 
 function setTimeoutToSavePoints() {
@@ -133,8 +127,8 @@ window.updateZoom = (delta) => {
   const position = window.position;
 
   const nextZoom = Math.min(
-    Math.max(MIN_ZOOM, position.zoom - delta * 0.3),
-    MAX_ZOOM
+    Math.max(position.minZoom, position.zoom - delta * 0.3),
+    position.maxZoom
   );
 
   const mouseBeforeZoom = {
@@ -144,13 +138,25 @@ window.updateZoom = (delta) => {
 
   position.zoom = nextZoom;
 
+  position.xOffscreen = BOARD_SIZE * position.zoom - window.innerWidth;
+  position.yOffscreen = BOARD_SIZE * position.zoom - window.innerHeight;
+
   const mouseAfterZoom = {
     x: position.mouseX / nextZoom,
     y: position.mouseY / nextZoom,
   };
 
-  position.xMin = position.xMin + (mouseBeforeZoom.x - mouseAfterZoom.x);
-  position.yMin = position.yMin + (mouseBeforeZoom.y - mouseAfterZoom.y);
+  const xMin = position.xMin + (mouseBeforeZoom.x - mouseAfterZoom.x);
+  const yMin = position.yMin + (mouseBeforeZoom.y - mouseAfterZoom.y);
+
+  position.xMin = Math.max(
+    0,
+    Math.min(xMin, position.xOffscreen / position.zoom)
+  );
+  position.yMin = Math.max(
+    0,
+    Math.min(yMin, position.yOffscreen / position.zoom)
+  );
 
   position.xOffset = -(position.xMin * position.zoom);
   position.yOffset = -(position.yMin * position.zoom);
@@ -161,17 +167,33 @@ window.updatePosition = (x, y) => {
 
   const position = window.position;
 
-  position.xOffset = position.xOffset - x;
-  position.yOffset = position.yOffset - y;
+  position.xOffset = Math.min(
+    0,
+    Math.max(-position.xOffscreen, position.xOffset - x)
+  );
+  position.yOffset = Math.min(
+    0,
+    Math.max(-position.yOffscreen, position.yOffset - y)
+  );
   position.xMin = -(position.xOffset / position.zoom);
   position.yMin = -(position.yOffset / position.zoom);
 };
 
-export function firstDraw(pixels) {
+export function firstDraw() {
   const canvas = window.hiddenCanvas;
   const ctx = window.hiddenCanvasCtx;
 
-  pixels.forEach(([color, address, value, [x, y]]) => {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  window.pixels.forEach(([color, address, value, [x, y]]) => {
+    window.pixelsById[`${x}-${y}`] = {
+      color,
+      address,
+      value,
+      x,
+      y,
+    };
+
     ctx.fillStyle = color;
     ctx.fillRect(x, y, 1, 1);
   });
@@ -181,19 +203,95 @@ export function firstDraw(pixels) {
   requestAnimationFrame(draw);
 }
 
-window.canvas.addEventListener("mousedown", (event) => {
-  const colorPicker = document.getElementById("colorPicker");
-
-  const color = colorPicker.value;
-
+function getPixelCoordinates({ clientX, clientY }) {
   const { xMin, yMin, zoom } = window.position;
 
+  return {
+    x: Math.floor(xMin + clientX / zoom),
+    y: Math.floor(yMin + clientY / zoom),
+  };
+}
+
+export function paintPixel({ x, y }) {
+  const colorPicker = document.getElementById("colorPicker");
+  const color = colorPicker.value;
+
   savePoint({
-    x: Math.floor(xMin + event.clientX / zoom),
-    y: Math.floor(yMin + event.clientY / zoom),
+    x,
+    y,
     color,
     size: 1,
   });
+
+  setTimeoutToSavePoints();
+}
+
+export function deletePixel({ x, y }) {
+  const id = `${x}-${y}`;
+  const pixel = window.pixelsById[id];
+
+  savePoint({
+    x: Number(x),
+    y: Number(y),
+    color: pixel?.color ?? "#000",
+    size: 1,
+    addToBag: false,
+  });
+
+  setTimeoutToSavePoints();
+
+  storageDeletePoint(id);
+}
+
+let clickingOnCanvas = false;
+let isDeleting = false;
+
+export function setDeleteMode() {
+  document.querySelector("html").classList.add("delete");
+  isDeleting = true;
+}
+
+export function setPaintingMode() {
+  document.querySelector("html").classList.remove("delete");
+  isDeleting = false;
+}
+
+export function disableCanvas() {
+  document.querySelector("canvas").classList.add("disabled");
+}
+
+export function enableCanvas() {
+  document.querySelector("canvas").classList.remove("disabled");
+}
+
+window.canvas.addEventListener("mousedown", (event) => {
+  if (window.isLoadingPixels) return;
+
+  const coordinates = getPixelCoordinates(event);
+
+  if (isDeleting) {
+    deletePixel(coordinates);
+  } else {
+    paintPixel(coordinates);
+  }
+
+  clickingOnCanvas = true;
+});
+
+window.canvas.addEventListener("mousemove", (event) => {
+  if (!clickingOnCanvas) return;
+
+  const coordinates = getPixelCoordinates(event);
+
+  if (isDeleting) {
+    deletePixel(coordinates);
+  } else {
+    paintPixel(coordinates);
+  }
+});
+
+document.addEventListener("mouseup", () => {
+  clickingOnCanvas = false;
 });
 
 window.canvas.addEventListener("wheel", (event) => {
@@ -220,7 +318,5 @@ document.addEventListener("mousemove", (e) => {
   window.position.mouseY = e.clientY;
 });
 
-document.addEventListener("resize", resizeCanvas);
-
-resizeCanvas();
-loadBlockchain(firstDraw);
+loadCanvas();
+loadBlockchain();
