@@ -3,7 +3,8 @@ const KEY = "PIXAL_saved_points";
 export function storageGetPoints() {
   try {
     return JSON.parse(window.localStorage.getItem(KEY) ?? "{}");
-  } catch {
+  } catch (err) {
+    console.log(err);
     return {};
   }
 }

@@ -1,4 +1,6 @@
-export const MAX_PER_BATCH = 50;
+const MAX_POINTS_PER_TRANSACTION = Number(
+  process.env.MAX_POINTS_PER_TRANSACTION
+);
 
 export default function paint(points) {
   const pixels = points.map(({ x, y, color, offer }) => [color, offer, [x, y]]);
@@ -16,7 +18,7 @@ export default function paint(points) {
       };
     }
 
-    if (acc[currentBatch].pixels.length === MAX_PER_BATCH) {
+    if (acc[currentBatch].pixels.length === MAX_POINTS_PER_TRANSACTION) {
       currentBatch++;
     }
 

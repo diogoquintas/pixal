@@ -11,7 +11,7 @@ import {
 } from "../app";
 import { getPixels } from "../blockchain/getPixels";
 import { BASE_VALUE, loadAccount } from "../blockchain/load";
-import paint, { MAX_PER_BATCH } from "../blockchain/paint";
+import paint from "../blockchain/paint";
 import {
   storageClearAllPoints,
   storageGetPoints,
@@ -20,6 +20,10 @@ import hideScrollbar from "../styles/hideScrollbar";
 import Eraser from "./Eraser";
 import Ethereum from "./Ethereum";
 import PointDetails from "./PointDetails";
+
+const MAX_POINTS_PER_TRANSACTION = Number(
+  process.env.MAX_POINTS_PER_TRANSACTION
+);
 
 const ColorPicker = styled.input`
   background: white;
@@ -183,7 +187,8 @@ function DetailsPanel() {
   }, []);
 
   const total = points.reduce((acc, item) => acc + item.offer, 0);
-  const transactions = Math.ceil(points.length / MAX_PER_BATCH);
+
+  const transactions = Math.ceil(points.length / MAX_POINTS_PER_TRANSACTION);
   const paintPoints = async () => {
     setLoading(true);
 
@@ -196,7 +201,8 @@ function DetailsPanel() {
       setPoints([]);
       storageClearAllPoints();
       firstDraw();
-    } catch {
+    } catch (err) {
+      console.log(err);
       alert("error on transaction");
     }
 
@@ -235,6 +241,7 @@ function DetailsPanel() {
                 deletePixel({ x, y });
               });
 
+              storageClearAllPoints();
               setPoints([]);
             }}
           >

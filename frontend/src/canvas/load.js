@@ -1,7 +1,7 @@
 import { BOARD_SIZE } from "../app";
 import { resizeCanvas } from "../events/resize";
 
-function loadCanvasPosition() {
+export function loadCanvasPosition() {
   const zoomX = window.innerWidth / (BOARD_SIZE + 2);
   const zoomY = window.innerHeight / (BOARD_SIZE + 2);
 
@@ -22,7 +22,10 @@ function loadCanvasPosition() {
 }
 
 export function loadCanvas() {
-  document.addEventListener("resize", resizeCanvas);
+  document.addEventListener("resize", () => {
+    resizeCanvas();
+    loadCanvasPosition();
+  });
 
   resizeCanvas();
   loadCanvasPosition();

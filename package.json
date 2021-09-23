@@ -1,0 +1,10 @@
+{
+  "name": "pixal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Diogo Quintas <odiogoribeiroq@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^1.5.0"
+  }
+}

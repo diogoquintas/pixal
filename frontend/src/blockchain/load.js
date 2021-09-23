@@ -4,8 +4,6 @@ import { getPixels } from "./getPixels.js";
 import { firstDraw, savePoint } from "../app.js";
 import { storageGetPoints } from "../storage/pointsStorage.js";
 
-const CONTRACT_ADDRESS = "0x362329EE1C42DbAd0d192802739b25341D56dAca";
-
 export const BASE_VALUE = 1;
 
 function loadWeb3() {
@@ -18,7 +16,7 @@ function loadWeb3() {
 async function loadContract() {
   window.contract = await new window.web3.eth.Contract(
     contractData.abi,
-    CONTRACT_ADDRESS
+    process.env.CONTRACT_ADDRESS
   );
 }
 
@@ -27,7 +25,8 @@ export async function loadAccount() {
     const accounts = await window.web3.eth.getAccounts();
 
     window.account = accounts[0];
-  } catch {
+  } catch (err) {
+    console.log(err);
     alert(
       "error getting an account, make sure you're correctly connected with a wallet"
     );
@@ -49,7 +48,8 @@ export default async function load() {
 
   try {
     await loadContract();
-  } catch {
+  } catch (err) {
+    console.log(err);
     alert(
       "error reading blockchain data, make sure you're correctly connected to a wallet"
     );
@@ -59,7 +59,8 @@ export default async function load() {
     await getPixels();
     firstDraw();
     loadStoragePoints();
-  } catch {
+  } catch (err) {
+    console.log(err);
     alert("error on fetching pixels");
   }
 }

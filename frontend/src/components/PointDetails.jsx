@@ -68,7 +68,8 @@ export default function PointDetails({ x, y, color, offer, setOffer, remove }) {
 
         setOffer(minOffer);
         setMinOffer(minOffer);
-      } catch {
+      } catch (err) {
+        console.log(err);
         setMinOffer(BASE_VALUE + 1);
       }
     }

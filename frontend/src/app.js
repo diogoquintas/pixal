@@ -42,14 +42,6 @@ function paintPoint({
 }) {
   const sizeOffset = zoomAmount * Math.floor((size - 1) / 2);
 
-  context.fillStyle = color;
-  context.fillRect(
-    x - sizeOffset,
-    y - sizeOffset,
-    zoomAmount * size,
-    zoomAmount * size
-  );
-
   context.strokeStyle = color;
   context.strokeRect(
     x - sizeOffset,
