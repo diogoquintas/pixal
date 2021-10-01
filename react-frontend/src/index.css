@@ -1,0 +1,81 @@
+@font-face {
+  font-family: "Perfect DOS VGA";
+  src: url("./fonts/Perfect\ DOS\ VGA\ 437\ Win.ttf");
+}
+
+:root {
+  --main-color: #ca98ff;
+  --secondary-color: #0000ff;
+}
+
+body {
+  background: #ca98ff;
+  color: white;
+  margin: 0;
+  overflow: hidden;
+  height: 100vh;
+  overscroll-behavior-x: none;
+}
+
+* {
+  font-family: "Perfect DOS VGA", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+    "Helvetica Neue", sans-serif;
+}
+
+#root {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.canvas-ready {
+  background-color: #1e1d1d;
+}
+
+p {
+  margin: 0;
+}
+
+.MuiLoadingButton-loadingIndicator {
+  color: darkgray !important;
+}
+
+.MuiLoadingButton-loading {
+  border-color: #363636 !important;
+  cursor: disabled;
+}
+
+.MuiTextField-root > .MuiInputBase-root {
+  color: var(--secondary-color);
+}
+
+.MuiInputBase-root > input {
+  padding: 0;
+  color: white;
+}
+
+.MuiInputBase-root:before {
+  content: none !important;
+}
+
+.MuiInputBase-root:after {
+  content: none !important;
+}
+
+.MuiInput-root {
+  line-height: initial;
+  width: 4rem;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}

@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { Fragment, h, render } from "preact";
+import { Fragment, h } from "preact";
 import { useEffect, useState } from "preact/hooks";
 import {
   deletePixel,
@@ -128,7 +128,7 @@ const PaintButton = styled.button`
   }
 `;
 
-function DetailsPanel() {
+export default function DetailsPanel() {
   const [points, setPoints] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -276,5 +276,3 @@ function DetailsPanel() {
     </Fragment>
   );
 }
-
-render(<DetailsPanel />, document.getElementById("detailsPanel"));

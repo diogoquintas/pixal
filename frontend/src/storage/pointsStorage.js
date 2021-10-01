@@ -1,4 +1,4 @@
-const KEY = "PIXAL_saved_points";
+const KEY = `${process.env.REACT_APP_NAME}_user_pixels`;
 
 export function storageGetPoints() {
   try {

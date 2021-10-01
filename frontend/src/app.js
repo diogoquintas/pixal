@@ -231,7 +231,6 @@ export function deletePixel({ x, y }) {
   });
 
   setTimeoutToSavePoints();
-
   storageDeletePoint(id);
 }
 
