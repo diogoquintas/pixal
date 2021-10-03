@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { BOARD_SIZE, insideInterval } from "../../App";
 import {
   Coordinates,
@@ -42,9 +42,8 @@ const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
     <>
       {chainInfo && (
         <div>
-          <p>{">_on-chain data"}</p>
-          <p>{`amount=${chainInfo.value}`}</p>
-          <p>{`painter=${chainInfo.address}`}</p>
+          <p>{`>_last value= ${chainInfo.value} wei`}</p>
+          <p>{`>_painter= ${chainInfo.address}`}</p>
         </div>
       )}
       <Coordinates

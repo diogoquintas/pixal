@@ -1,7 +1,7 @@
-import Input from "@mui/material/Input";
 import { useEffect, useMemo, useState } from "react";
 import Minus from "../icons/Minus";
 import Plus from "../icons/Plus";
+import PaintButton from "../paint-button/PaintButton";
 import {
   Control,
   ControlsWrapper,
@@ -9,9 +9,19 @@ import {
   StyledList,
   Item,
   Color,
-  Amount,
   Delete,
+  Info,
+  Value,
 } from "./PixelList.styles";
+
+const BASE_VALUE = 1;
+const MAX_PIXELS_PER_TRANSACTION = Number(
+  process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
+);
+
+function getValueWithFees(value) {
+  return value + value * 0.3 + value * 0.1;
+}
 
 const PixelItem = ({
   setDeleteQueue,
@@ -23,6 +33,7 @@ const PixelItem = ({
   color,
   x,
   y,
+  value,
 }) => {
   useEffect(() => {
     return () => {
@@ -46,44 +57,62 @@ const PixelItem = ({
           <span>{`[${color}]`}</span>
         </Color>
         <span>{`<${x}, ${y}>`}</span>
-        <Amount>
-          <label id={`${id}-amount-label`}>amount(wei):</label>
-          <Input
-            inputProps={{
-              value: 1,
-              type: "number",
-              name: "value",
-              "aria-labelledby": `${id}-amount-label`,
-            }}
-          />
-        </Amount>
-        <Delete onClick={() => setToDelete({ x, y, id })}>delete</Delete>
+        <Value>{`${value} wei`}</Value>
+        <Delete onClick={() => setToDelete({ x, y, id })}>[x]</Delete>
       </div>
     </Item>
   );
 };
 
-export default function PixelList({ pixels, revertPixel }) {
+export default function PixelList({
+  pixels,
+  revertPixel,
+  chainPixels,
+  setTransacting,
+  transacting,
+  setAlert,
+}) {
   const [open, setOpen] = useState(false);
   const [deleteQueue, setDeleteQueue] = useState([]);
+  const [total, setTotal] = useState(0);
 
   const pixelsAsList = useMemo(
-    () =>
-      Object.keys(pixels).flatMap((id) => {
+    () => {
+      let listTotal = 0;
+
+      const list = Object.keys(pixels).flatMap((id) => {
         const [x, y] = id.split("-");
+
+        const onChain = chainPixels.current[id];
+        const value = onChain ? getValueWithFees(onChain.value) : BASE_VALUE;
+
+        listTotal = listTotal + value;
 
         return {
           id,
           x,
           y,
           color: pixels[id],
+          address: onChain?.address,
+          value,
         };
-      }),
+      });
+
+      setTotal(listTotal);
+
+      return list;
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pixels]
   );
 
   const setToDelete = ({ x, y, id }) => {
     setDeleteQueue((queue) => queue.concat(id));
+  };
+
+  const deleteAll = () => {
+    pixelsAsList.forEach(({ x, y }) => revertPixel({ x, y }));
+    setOpen(false);
   };
 
   if (pixelsAsList?.length === 0) return null;
@@ -100,28 +129,25 @@ export default function PixelList({ pixels, revertPixel }) {
           <span>{pixelsAsList.length}</span>
           {open ? <Minus /> : <Plus />}
         </Control>
-
-        <Control
-          variant="text"
-          onClick={() => {
-            pixelsAsList.forEach(({ x, y }) => revertPixel({ x, y }));
-            setOpen(false);
-          }}
-        >
+        <Control variant="text" onClick={deleteAll}>
           Delete all
         </Control>
-        <Control variant="outlined" onClick={() => console.log("paint")}>
-          Paint on-chain
-        </Control>
+        <PaintButton
+          transacting={transacting}
+          setTransacting={setTransacting}
+          pixels={pixelsAsList}
+          setAlert={setAlert}
+          deleteAll={deleteAll}
+        />
       </ControlsWrapper>
       <ListWrapper open={open}>
         <StyledList
-          width={485}
+          width={400}
           height={500}
           rowCount={pixelsAsList.length}
           rowHeight={45}
           rowRenderer={({ key, index, style }) => {
-            const { color, x, y, id } = pixelsAsList[index];
+            const { color, x, y, id, value } = pixelsAsList[index];
 
             return (
               <PixelItem
@@ -136,11 +162,18 @@ export default function PixelList({ pixels, revertPixel }) {
                   color,
                   x,
                   y,
+                  value,
                 }}
               />
             );
           }}
         />
+        <Info>
+          <span>{`>_total= ${total} wei`}</span>
+          <span>{`>_transactions= ${Math.ceil(
+            pixelsAsList.length / MAX_PIXELS_PER_TRANSACTION
+          )}`}</span>
+        </Info>
       </ListWrapper>
     </>
   );

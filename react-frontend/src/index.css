@@ -79,3 +79,12 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+button.MuiButtonBase-root.Mui-disabled {
+  color: gray;
+  border-color: gray;
+}
+
+button.MuiButtonBase-root.MuiButton-text {
+  background: black;
+}

@@ -68,13 +68,7 @@ export const Item = styled.div`
         `
       : css`
           &:hover {
-            background: white;
-            color: black;
-
-            & input,
-            & button {
-              color: black;
-            }
+            background: var(--secondary-color);
           }
         `}
 `;
@@ -87,6 +81,7 @@ export const ListWrapper = styled.div`
   transition: transform 150ms ease;
   margin-bottom: 0.5rem;
   background: black;
+  border: 0.1rem solid var(--main-color);
 `;
 
 export const Color = styled.div`
@@ -106,11 +101,6 @@ export const Color = styled.div`
   }
 `;
 
-export const Amount = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
 export const Delete = styled.button`
   background: none;
   border: none;
@@ -124,4 +114,14 @@ export const Delete = styled.button`
   &:hover  {
     text-decoration: underline;
   }
+`;
+
+export const Info = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin: 0.5rem;
+`;
+
+export const Value = styled.span`
+  width: 5rem !important;
 `;

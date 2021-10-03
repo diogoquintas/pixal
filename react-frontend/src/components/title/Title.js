@@ -86,7 +86,7 @@ export default function Title({ title }) {
           }
         }}
       >
-        {title}
+        {`${title}`}
       </H1>
       <audio ref={audioRef} src="/intro.mp3"></audio>
     </>

@@ -57,8 +57,7 @@ function App() {
     const canvas = canvasRef.current;
     const ctx = canvasCtx.current;
 
-    const { zoom, xMin, yMin, offsetX, offsetY, mouseX, mouseY } =
-      position.current;
+    const { zoom, xMin, yMin, offsetX, offsetY } = position.current;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -85,13 +84,23 @@ function App() {
 
     const { x, y } = getPixelCoordinates();
 
-    ctx.fillStyle = color.current;
-    ctx.fillRect(
-      (x - Math.floor(size.current / 2) - xMin) * zoom,
-      (y - Math.floor(size.current / 2) - yMin) * zoom,
-      size.current * zoom,
-      size.current * zoom
-    );
+    if (currentMode.current === MODE.paint) {
+      ctx.fillStyle = color.current;
+      ctx.fillRect(
+        (x - Math.floor(size.current / 2) - xMin) * zoom,
+        (y - Math.floor(size.current / 2) - yMin) * zoom,
+        size.current * zoom,
+        size.current * zoom
+      );
+    } else if (currentMode.current === MODE.delete) {
+      ctx.strokeStyle = SECONDARY_COLOR;
+      ctx.strokeRect(
+        (x - Math.floor(size.current / 2) - xMin) * zoom,
+        (y - Math.floor(size.current / 2) - yMin) * zoom,
+        size.current * zoom,
+        size.current * zoom
+      );
+    }
 
     requestAnimationFrame(draw);
   };
@@ -345,7 +354,11 @@ function App() {
     <>
       {alert && (
         <AlertWrapper>
-          <Alert variant="filled" severity={alert.severity}>
+          <Alert
+            variant="filled"
+            severity={alert.severity}
+            onClose={() => setAlert(undefined)}
+          >
             {alert.msg}
           </Alert>
         </AlertWrapper>
@@ -368,7 +381,14 @@ function App() {
               canvasReady={canvasReady}
             />
             <Controls mode={mode} setMode={setMode} color={color} size={size} />
-            <PixelList pixels={localPixels} revertPixel={revertPixel} />
+            <PixelList
+              pixels={localPixels}
+              revertPixel={revertPixel}
+              chainPixels={chainPixels}
+              setTransacting={setTransacting}
+              transacting={transacting}
+              setAlert={setAlert}
+            />
           </>
         ) : (
           <Loading drawMap={drawMap} />
