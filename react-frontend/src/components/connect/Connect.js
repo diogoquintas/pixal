@@ -28,7 +28,7 @@ export default function Connect({ setAlert, pixelList, setConnected }) {
     try {
       if (isMobileDevice()) {
         window.location.replace(
-          `metamask://${window.location.hostname}.xip.io:${window.location.port}`
+          `metamask://${process.env.REACT_APP_METAMASK_DEEP_LINK}`
         );
 
         window.setTimeout(() => {
