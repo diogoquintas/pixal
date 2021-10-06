@@ -1,3 +1,3 @@
 export default function getPixels() {
-  return window.contract.methods._getPixels().call();
+  return window.contract.methods.pixelsInfo().call();
 }

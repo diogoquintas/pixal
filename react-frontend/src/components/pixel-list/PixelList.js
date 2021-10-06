@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { REFERENCE_PRICE } from "../../App";
 import Minus from "../icons/Minus";
 import Plus from "../icons/Plus";
 import PaintButton from "../paint-button/PaintButton";
@@ -14,13 +15,14 @@ import {
   Value,
 } from "./PixelList.styles";
 
-const BASE_VALUE = 1;
 const MAX_PIXELS_PER_TRANSACTION = Number(
   process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
 );
 
-function getValueWithFees(value) {
-  return value + value * 0.3 + value * 0.1;
+export function getPixelPrice(count) {
+  if (count === 0) return 0;
+
+  return REFERENCE_PRICE * Math.pow(10, Math.min(11, count));
 }
 
 const PixelItem = ({
@@ -33,7 +35,7 @@ const PixelItem = ({
   color,
   x,
   y,
-  value,
+  price,
 }) => {
   useEffect(() => {
     return () => {
@@ -57,7 +59,7 @@ const PixelItem = ({
           <span>{`[${color}]`}</span>
         </Color>
         <span>{`<${x}, ${y}>`}</span>
-        <Value>{`${value} wei`}</Value>
+        <Value title={`${price} ETH`}>{`${price} ETH`}</Value>
         <Delete onClick={() => setToDelete({ x, y, id })}>[x]</Delete>
       </div>
     </Item>
@@ -71,6 +73,8 @@ export default function PixelList({
   setTransacting,
   transacting,
   setAlert,
+  drawMap,
+  chainPixelsAsList,
 }) {
   const [open, setOpen] = useState(false);
   const [deleteQueue, setDeleteQueue] = useState([]);
@@ -84,9 +88,10 @@ export default function PixelList({
         const [x, y] = id.split("-");
 
         const onChain = chainPixels.current[id];
-        const value = onChain ? getValueWithFees(onChain.value) : BASE_VALUE;
+        const paintCount = onChain?.paintCount ?? 0;
+        const price = getPixelPrice(paintCount);
 
-        listTotal = listTotal + value;
+        listTotal = listTotal + price;
 
         return {
           id,
@@ -94,7 +99,8 @@ export default function PixelList({
           y,
           color: pixels[id],
           address: onChain?.address,
-          value,
+          price,
+          paintCount,
         };
       });
 
@@ -138,6 +144,8 @@ export default function PixelList({
           pixels={pixelsAsList}
           setAlert={setAlert}
           deleteAll={deleteAll}
+          drawMap={drawMap}
+          chainPixelsAsList={chainPixelsAsList}
         />
       </ControlsWrapper>
       <ListWrapper open={open}>
@@ -147,29 +155,25 @@ export default function PixelList({
           rowCount={pixelsAsList.length}
           rowHeight={45}
           rowRenderer={({ key, index, style }) => {
-            const { color, x, y, id, value } = pixelsAsList[index];
+            const pixel = pixelsAsList[index];
 
             return (
               <PixelItem
                 key={key}
-                inDeleteQueue={deleteQueue.includes(id)}
+                inDeleteQueue={deleteQueue.includes(pixel.id)}
                 {...{
                   setDeleteQueue,
                   style,
                   revertPixel,
                   setToDelete,
-                  id,
-                  color,
-                  x,
-                  y,
-                  value,
+                  ...pixel,
                 }}
               />
             );
           }}
         />
         <Info>
-          <span>{`>_total= ${total} wei`}</span>
+          <span>{`>_total= ${total} ETH`}</span>
           <span>{`>_transactions= ${Math.ceil(
             pixelsAsList.length / MAX_PIXELS_PER_TRANSACTION
           )}`}</span>

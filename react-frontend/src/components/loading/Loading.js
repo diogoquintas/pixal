@@ -6,9 +6,9 @@ const P = styled.p`
   color: var(--secondary-color);
 `;
 
-export default function Loading({ drawMap }) {
+export default function Loading({ onMount }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(drawMap, []);
+  useEffect(onMount, []);
 
   return <P>Loading blockchain data...</P>;
 }

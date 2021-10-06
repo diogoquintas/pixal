@@ -22,6 +22,7 @@ export const MODE = {
 };
 export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
+export const REFERENCE_PRICE = 0.00001;
 
 const ZOOM_STRENGTH = 0.5;
 
@@ -39,7 +40,7 @@ function App() {
 
   const map = useRef(document.createElement("canvas"));
   const mapCtx = useRef(map.current.getContext("2d"));
-  const pixelList = useRef([]);
+  const chainPixelsAsList = useRef([]);
   const imageRef = useRef();
   const canvasRef = useRef();
   const canvasCtx = useRef();
@@ -105,29 +106,42 @@ function App() {
     requestAnimationFrame(draw);
   };
 
-  const drawMap = () => {
+  const drawMap = ({ updateImage } = {}) => {
     const canvas = map.current;
     const ctx = mapCtx.current;
     const nextChainPixels = {};
 
     ctx.clearRect(0, 0, map.width, map.height);
 
-    pixelList.current.forEach(([color, address, value, [x, y]]) => {
-      const id = `${x}-${y}`;
+    chainPixelsAsList.current.forEach(
+      ([color, paintCount, [x, y], address]) => {
+        const id = `${x}-${y}`;
 
-      nextChainPixels[id] = {
-        color,
-        address,
-        value,
-        x,
-        y,
-      };
+        nextChainPixels[id] = {
+          color,
+          address,
+          paintCount,
+          x,
+          y,
+        };
 
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, 1, 1);
-    });
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    );
 
     chainPixels.current = nextChainPixels;
+
+    if (updateImage) {
+      imageRef.current.src = canvas.toDataURL();
+    }
+  };
+
+  const firstDraw = () => {
+    drawMap();
+
+    const canvas = map.current;
+    const ctx = mapCtx.current;
 
     const storagePixels = storageGetPixels();
 
@@ -140,14 +154,15 @@ function App() {
           ctx.fillRect(x, y, 1, 1);
         });
 
-        imageRef.current.src = canvas.toDataURL();
-        setPixelsLoaded(true);
         setLocalPixels(storagePixels);
+
+        setPixelsLoaded(true);
+        imageRef.current.src = canvas.toDataURL();
       });
-    } else {
-      imageRef.current.src = canvas.toDataURL();
-      setPixelsLoaded(true);
     }
+
+    setPixelsLoaded(true);
+    imageRef.current.src = canvas.toDataURL();
   };
 
   const addPixelToQueue = ({ id, color, remove }) => {
@@ -388,17 +403,19 @@ function App() {
               setTransacting={setTransacting}
               transacting={transacting}
               setAlert={setAlert}
+              drawMap={drawMap}
+              chainPixelsAsList={chainPixelsAsList}
             />
           </>
         ) : (
-          <Loading drawMap={drawMap} />
+          <Loading onMount={firstDraw} />
         )
       ) : (
         <>
           <Title title={process.env.REACT_APP_NAME} />
           <Connect
             setAlert={setAlert}
-            pixelList={pixelList}
+            chainPixelsAsList={chainPixelsAsList}
             setConnected={setConnected}
           />
         </>

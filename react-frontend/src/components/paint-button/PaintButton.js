@@ -1,3 +1,4 @@
+import getPixels from "../../logic/blockchain/getPixels";
 import paint from "../../logic/blockchain/paint";
 import { Control } from "../pixel-list/PixelList.styles";
 
@@ -7,6 +8,8 @@ export default function PaintButton({
   pixels,
   setAlert,
   deleteAll,
+  drawMap,
+  chainPixelsAsList,
 }) {
   return (
     <Control
@@ -18,6 +21,9 @@ export default function PaintButton({
 
         try {
           await paint(pixels);
+
+          chainPixelsAsList.current = await getPixels();
+          drawMap({ updateImage: true });
 
           deleteAll();
           setTransacting(false);

@@ -1,8 +1,70 @@
 [
   {
-    "inputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "color",
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "x",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "y",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Coordinates",
+            "name": "coordinates",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct Pixel[]",
+        "name": "_pixels",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "canAfford",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
     "inputs": [],
@@ -15,8 +77,44 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function",
-    "constant": true
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "color",
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "x",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "y",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Coordinates",
+            "name": "coordinates",
+            "type": "tuple"
+          }
+        ],
+        "internalType": "struct Pixel[]",
+        "name": "_pixels",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "paintPixels",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
     "inputs": [
@@ -33,12 +131,12 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Coordinate",
-        "name": "coordinate",
+        "internalType": "struct Coordinates",
+        "name": "_coordinates",
         "type": "tuple"
       }
     ],
-    "name": "_getPixel",
+    "name": "pixelInfo",
     "outputs": [
       {
         "components": [
@@ -48,13 +146,8 @@
             "type": "string"
           },
           {
-            "internalType": "address payable",
-            "name": "owner",
-            "type": "address"
-          },
-          {
             "internalType": "uint256",
-            "name": "value",
+            "name": "paintCount",
             "type": "uint256"
           },
           {
@@ -70,120 +163,77 @@
                 "type": "uint256"
               }
             ],
-            "internalType": "struct Coordinate",
-            "name": "coordinate",
+            "internalType": "struct Coordinates",
+            "name": "coordinates",
             "type": "tuple"
+          },
+          {
+            "internalType": "address payable",
+            "name": "owner",
+            "type": "address"
           }
         ],
-        "internalType": "struct Pixel",
+        "internalType": "struct PixelInfo",
         "name": "",
         "type": "tuple"
       }
     ],
     "stateMutability": "view",
-    "type": "function",
-    "constant": true
+    "type": "function"
   },
   {
     "inputs": [
       {
         "components": [
           {
-            "internalType": "string",
-            "name": "color",
-            "type": "string"
-          },
-          {
             "internalType": "uint256",
-            "name": "offer",
+            "name": "x",
             "type": "uint256"
           },
           {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "x",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "y",
-                "type": "uint256"
-              }
-            ],
-            "internalType": "struct Coordinate",
-            "name": "coordinate",
-            "type": "tuple"
+            "internalType": "uint256",
+            "name": "y",
+            "type": "uint256"
           }
         ],
-        "internalType": "struct PixelToPaint[]",
-        "name": "pixels",
-        "type": "tuple[]"
+        "internalType": "struct Coordinates",
+        "name": "_coordinates",
+        "type": "tuple"
       }
     ],
-    "name": "_paintPixels",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function",
-    "payable": true
-  },
-  {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "color",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "offer",
-            "type": "uint256"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "x",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "y",
-                "type": "uint256"
-              }
-            ],
-            "internalType": "struct Coordinate",
-            "name": "coordinate",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct PixelToPaint[]",
-        "name": "pixels",
-        "type": "tuple[]"
-      },
+    "name": "pixelPosition",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "offer",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "_canAfford",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_paintCount",
+        "type": "uint256"
+      }
+    ],
+    "name": "pixelPrice",
     "outputs": [
       {
-        "internalType": "bool",
+        "internalType": "uint256",
         "name": "",
-        "type": "bool"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
-    "type": "function",
-    "constant": true
+    "type": "function"
   },
   {
     "inputs": [],
-    "name": "_getPixels",
+    "name": "pixelsInfo",
     "outputs": [
       {
         "components": [
@@ -193,13 +243,8 @@
             "type": "string"
           },
           {
-            "internalType": "address payable",
-            "name": "owner",
-            "type": "address"
-          },
-          {
             "internalType": "uint256",
-            "name": "value",
+            "name": "paintCount",
             "type": "uint256"
           },
           {
@@ -215,25 +260,53 @@
                 "type": "uint256"
               }
             ],
-            "internalType": "struct Coordinate",
-            "name": "coordinate",
+            "internalType": "struct Coordinates",
+            "name": "coordinates",
             "type": "tuple"
+          },
+          {
+            "internalType": "address payable",
+            "name": "owner",
+            "type": "address"
           }
         ],
-        "internalType": "struct Pixel[]",
+        "internalType": "struct PixelInfo[]",
         "name": "",
         "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
-    "type": "function",
-    "constant": true
+    "type": "function"
   },
   {
     "inputs": [],
-    "name": "_withdrawal",
+    "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "stateMutability": "payable",
+    "type": "receive"
   }
 ]

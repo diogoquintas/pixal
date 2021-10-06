@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useState } from "react";
 import { BOARD_SIZE, insideInterval } from "../../App";
+import { getPixelPrice } from "../pixel-list/PixelList";
 import {
   Coordinates,
   Image,
@@ -8,9 +9,19 @@ import {
   Marker,
   Wrapper,
 } from "./Map.styles";
+import namehash from "eth-ens-namehash";
+
+async function reverseName(address) {
+  const lookup = address.toLowerCase().substr(2) + ".addr.reverse";
+  const ResolverContract = await window.web3.eth.ens.resolver(lookup);
+  const nh = namehash.hash(lookup);
+
+  return ResolverContract.methods.name(nh).call();
+}
 
 const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
   const [coordinates, setCoordinates] = useState();
+  const [names, setNames] = useState({});
 
   useEffect(() => {
     function handleMouseMove(event) {
@@ -32,18 +43,44 @@ const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!coordinates) return;
+
+    const address =
+      chainPixels.current?.[`${coordinates.x}-${coordinates.y}`]?.address;
+
+    if (!address) return;
+    if (names[address]) return;
+
+    async function getName() {
+      try {
+        const name = await reverseName(address);
+
+        setNames((names) => ({ ...names, [address]: name }));
+      } catch (err) {
+        console.log(err);
+        setNames((names) => ({ ...names, [address]: address }));
+      }
+    }
+
+    getName();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [coordinates]);
+
   if (!coordinates) return null;
 
   const { x, y } = coordinates;
-
   const chainInfo = chainPixels.current?.[`${x}-${y}`];
 
   return (
     <>
       {chainInfo && (
         <div>
-          <p>{`>_last value= ${chainInfo.value} wei`}</p>
-          <p>{`>_painter= ${chainInfo.address}`}</p>
+          <p>{`>_painted ${chainInfo.paintCount} time${
+            chainInfo.paintCount === 1 ? "" : "s"
+          }`}</p>
+          <p>{`>_price= ${getPixelPrice(chainInfo.paintCount ?? 0)} ETH`}</p>
+          <p>{`>_painter= ${names[chainInfo.address] ?? chainInfo.address}`}</p>
         </div>
       )}
       <Coordinates

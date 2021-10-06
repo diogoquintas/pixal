@@ -123,5 +123,8 @@ export const Info = styled.div`
 `;
 
 export const Value = styled.span`
-  width: 5rem !important;
+  width: 7rem !important;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 `;

@@ -17,7 +17,7 @@ function isMobileDevice() {
   );
 }
 
-export default function Connect({ setAlert, pixelList, setConnected }) {
+export default function Connect({ setAlert, chainPixelsAsList, setConnected }) {
   const [connecting, setConnecting] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
 
@@ -95,7 +95,7 @@ export default function Connect({ setAlert, pixelList, setConnected }) {
     }
 
     try {
-      pixelList.current = await getPixels();
+      chainPixelsAsList.current = await getPixels();
     } catch (err) {
       console.log(err);
       setAlert({
