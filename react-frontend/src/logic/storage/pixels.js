@@ -1,10 +1,10 @@
+// USE THE ACCOUNT ADDRESS TO BUILD THIS KEY
 const KEY = `${process.env.REACT_APP_NAME}_user_pixels`;
 
 export function storageGetPixels() {
   try {
     return JSON.parse(window.localStorage.getItem(KEY) ?? "{}");
-  } catch (err) {
-    console.log(err);
+  } catch {
     return {};
   }
 }

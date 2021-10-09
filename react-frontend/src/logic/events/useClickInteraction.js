@@ -74,5 +74,5 @@ export default function useClickInteraction({
       canvas.removeEventListener("mouseup", handleMouseUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disabled]);
+  }, [disabled, transacting]);
 }

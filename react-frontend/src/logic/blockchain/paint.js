@@ -3,18 +3,19 @@ const MAX_PIXELS_PER_TRANSACTION = Number(
 );
 
 export default function paint(initialPixels) {
-  const pixels = initialPixels.map(({ x, y, color, price }) => [color, [x, y]]);
+  const pixels = initialPixels.map(({ x, y, color }) => [color, [x, y]]);
 
   let currentBatch = 0;
 
   const batches = pixels.reduce((acc, pixel, index) => {
+    const price = Number(initialPixels[index].price);
+
     if (acc[currentBatch]) {
-      acc[currentBatch].value =
-        acc[currentBatch].value + initialPixels[index].price;
+      acc[currentBatch].value = acc[currentBatch].value + price;
       acc[currentBatch].pixels.push(pixel);
     } else {
       acc[currentBatch] = {
-        value: initialPixels[index].price,
+        value: price,
         pixels: [pixel],
       };
     }
@@ -30,7 +31,7 @@ export default function paint(initialPixels) {
     batches.map((batch) =>
       window.contract.methods.paintPixels(batch.pixels).send({
         from: window.account,
-        value: batch.value,
+        value: batch.value.toString(),
       })
     )
   );

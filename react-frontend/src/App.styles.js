@@ -1,14 +1,23 @@
 import styled from "@emotion/styled";
+import hideScrollbar from "./styles/hideScrollbar";
 
 export const AlertWrapper = styled.div`
   position: fixed;
   top: 1rem;
-  left: 1rem;
-  width: calc(100% - 2rem);
+  right: 1rem;
+  width: 32rem;
   display: flex;
   justify-content: center;
 
   & a {
     color: white;
   }
+`;
+
+export const ErrorPre = styled.pre`
+  white-space: pre-wrap;
+  max-width: 25rem;
+  overflow: auto;
+
+  ${hideScrollbar}
 `;

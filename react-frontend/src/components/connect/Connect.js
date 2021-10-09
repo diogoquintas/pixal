@@ -10,6 +10,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { ErrorPre } from "../../App.styles";
 
 function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -17,7 +18,11 @@ function isMobileDevice() {
   );
 }
 
-export default function Connect({ setAlert, chainPixelsAsList, setConnected }) {
+export default function Connect({
+  setAlert,
+  setPixelsToLoad,
+  updateChainPixel,
+}) {
   const [connecting, setConnecting] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
 
@@ -54,13 +59,13 @@ export default function Connect({ setAlert, chainPixelsAsList, setConnected }) {
     try {
       await loadAccount();
     } catch (err) {
-      console.log(err);
       setAlert({
-        msg: (
-          <p>
-            There was an error connecting to your account, make sure you have an
-            account selected
-          </p>
+        msg: <ErrorPre>{err.message}</ErrorPre>,
+        title: (
+          <>
+            &gt;_There was an error connecting to your account, make sure you
+            have an account selected
+          </>
         ),
         severity: "error",
       });
@@ -71,11 +76,39 @@ export default function Connect({ setAlert, chainPixelsAsList, setConnected }) {
     try {
       await loadContract();
     } catch (err) {
-      console.log(err);
       setAlert({
-        msg: (
-          <p>
-            There was an error reading the blockchain data, make sure you're
+        msg: <ErrorPre>{err.message}</ErrorPre>,
+        title: (
+          <>
+            &gt;_There was an error reading the blockchain data, make sure
+            you're connected to the correct network. We currently use Arbitrum
+            for faster and cheaper connections, follow this link to{" "}
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href="https://developer.offchainlabs.com/docs/public_testnet#connecting-to-the-chain"
+            >
+              connect to the chain
+            </a>
+            .
+          </>
+        ),
+        severity: "error",
+      });
+      setConnecting(false);
+      return;
+    }
+
+    try {
+      const pixels = await getPixels();
+
+      setPixelsToLoad(pixels ?? []);
+    } catch (err) {
+      setAlert({
+        msg: <ErrorPre>{err.message}</ErrorPre>,
+        title: (
+          <>
+            &gt;_There was an error fetching the pixels, make sure you're
             connected to the correct network. We currently use Arbitrum for
             faster and cheaper connections, follow this link to{" "}
             <a
@@ -86,7 +119,7 @@ export default function Connect({ setAlert, chainPixelsAsList, setConnected }) {
               connect to the chain
             </a>
             .
-          </p>
+          </>
         ),
         severity: "error",
       });
@@ -94,33 +127,8 @@ export default function Connect({ setAlert, chainPixelsAsList, setConnected }) {
       return;
     }
 
-    try {
-      chainPixelsAsList.current = await getPixels();
-    } catch (err) {
-      console.log(err);
-      setAlert({
-        msg: (
-          <p>
-            There was an error fetching the pixels, make sure you're connected
-            to the correct network. We currently use Arbitrum for faster and
-            cheaper connections, follow this link to{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href="https://developer.offchainlabs.com/docs/public_testnet#connecting-to-the-chain"
-            >
-              connect to the chain
-            </a>
-            .
-          </p>
-        ),
-        severity: "error",
-      });
-      setConnecting(false);
-      return;
-    }
+    window.contract.events.PixelPainted(undefined, updateChainPixel);
 
-    setConnected(true);
     setConnecting(false);
   };
 

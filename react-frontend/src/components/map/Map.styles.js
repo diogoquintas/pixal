@@ -63,3 +63,7 @@ export const Marker = styled.div`
   border: 0.1rem solid var(--secondary-color);
   pointer-events: none;
 `;
+
+export const InfoDiv = styled.div`
+  background: black;
+`;

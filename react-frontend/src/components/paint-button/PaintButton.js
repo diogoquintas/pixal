@@ -1,4 +1,5 @@
-import getPixels from "../../logic/blockchain/getPixels";
+import { ErrorPre } from "../../App.styles";
+import loadAccount from "../../logic/blockchain/loadAccount";
 import paint from "../../logic/blockchain/paint";
 import { Control } from "../pixel-list/PixelList.styles";
 
@@ -7,9 +8,6 @@ export default function PaintButton({
   setTransacting,
   pixels,
   setAlert,
-  deleteAll,
-  drawMap,
-  chainPixelsAsList,
 }) {
   return (
     <Control
@@ -20,25 +18,21 @@ export default function PaintButton({
         setAlert(undefined);
 
         try {
+          await loadAccount();
           await paint(pixels);
 
-          chainPixelsAsList.current = await getPixels();
-          drawMap({ updateImage: true });
-
-          deleteAll();
           setTransacting(false);
 
           setAlert({
-            msg: "Congrats on your transaction!",
+            msg: ">_congrats on your transaction!",
             severity: "success",
+            dismissibleTime: 3000,
           });
-
-          setTimeout(() => setAlert(undefined), 3000);
         } catch (err) {
-          console.log(err);
-
           setAlert({
-            msg: "An error happened processing your transaction, please check if your wallet and account are correctly connected.",
+            msg: <ErrorPre>{err.message}</ErrorPre>,
+            title:
+              ">_an error occurred in your transaction, please check if your wallet and account are correctly connected.",
             severity: "error",
           });
           setTransacting(false);

@@ -10,8 +10,9 @@ import { MODE } from "../../App";
 const StyledCanvas = styled.canvas`
   cursor: cell;
 
-  ${({ isMove }) =>
+  ${({ isMove, isTransacting }) =>
     isMove &&
+    !isTransacting &&
     css`
       cursor: move;
     `}
@@ -19,7 +20,7 @@ const StyledCanvas = styled.canvas`
   ${({ transacting }) =>
     transacting &&
     css`
-      cursor: disabled;
+      cursor: not-allowed;
     `}
 `;
 

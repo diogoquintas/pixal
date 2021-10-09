@@ -9,10 +9,11 @@ import Title from "./components/title/Title";
 import useTimeout from "./logic/useTimeout";
 import Controls from "./components/controls/Controls";
 import Connect from "./components/connect/Connect";
-import PixelList from "./components/pixel-list/PixelList";
+import PixelList, { getPixelPrice } from "./components/pixel-list/PixelList";
 import Map from "./components/map/Map";
 import { MIN_SIZE } from "./components/size-picker/SizePicker";
 import { MAP_SIZE } from "./components/map/Map.styles";
+import { AlertTitle } from "@mui/material";
 
 export const BOARD_SIZE = 1000;
 export const MODE = {
@@ -22,7 +23,7 @@ export const MODE = {
 };
 export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
-export const REFERENCE_PRICE = 0.00001;
+export const REFERENCE_PRICE = 10000000000000;
 
 const ZOOM_STRENGTH = 0.5;
 
@@ -30,17 +31,17 @@ export const insideInterval = (coordinate) =>
   coordinate >= 0 && coordinate < BOARD_SIZE;
 
 function App() {
-  const [connected, setConnected] = useState(false);
   const [pixelsLoaded, setPixelsLoaded] = useState(false);
   const [transacting, setTransacting] = useState(false);
   const [mode, setMode] = useState(MODE.paint);
-  const [alert, setAlert] = useState();
+  const [alert, initialSetAlert] = useState();
   const [canvasReady, setCanvasReady] = useState(false);
   const [localPixels, setLocalPixels] = useState({});
+  const [pixelsToLoad, setPixelsToLoad] = useState();
+  const [stateChainPixels, setStateChainPixels] = useState({});
 
   const map = useRef(document.createElement("canvas"));
   const mapCtx = useRef(map.current.getContext("2d"));
-  const chainPixelsAsList = useRef([]);
   const imageRef = useRef();
   const canvasRef = useRef();
   const canvasCtx = useRef();
@@ -53,6 +54,25 @@ function App() {
   const chainPixels = useRef({});
   const currentMode = useRef(MODE.paint);
   const markerRef = useRef();
+  const alertTimeout = useRef();
+
+  const parsePixel = (pixel) => {
+    const {
+      color,
+      coordinates: [x, y],
+      owner,
+      paintCount,
+    } = pixel;
+
+    return {
+      color,
+      owner,
+      paintCount: Number(paintCount),
+      x: Number(x),
+      y: Number(y),
+      id: `${x}-${y}`,
+    };
+  };
 
   const draw = () => {
     const canvas = canvasRef.current;
@@ -106,35 +126,31 @@ function App() {
     requestAnimationFrame(draw);
   };
 
-  const drawMap = ({ updateImage } = {}) => {
-    const canvas = map.current;
+  const drawMap = () => {
     const ctx = mapCtx.current;
     const nextChainPixels = {};
 
     ctx.clearRect(0, 0, map.width, map.height);
 
-    chainPixelsAsList.current.forEach(
-      ([color, paintCount, [x, y], address]) => {
-        const id = `${x}-${y}`;
+    pixelsToLoad.forEach((pixel) => {
+      if (pixel.paintCount === "0") return;
 
-        nextChainPixels[id] = {
-          color,
-          address,
-          paintCount,
-          x,
-          y,
-        };
+      const { id, x, y, color, paintCount, owner } = parsePixel(pixel);
 
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, 1, 1);
-      }
-    );
+      nextChainPixels[id] = {
+        color,
+        x,
+        y,
+        paintCount,
+        owner,
+      };
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, 1, 1);
+    });
 
     chainPixels.current = nextChainPixels;
-
-    if (updateImage) {
-      imageRef.current.src = canvas.toDataURL();
-    }
+    setStateChainPixels(nextChainPixels);
   };
 
   const firstDraw = () => {
@@ -165,7 +181,7 @@ function App() {
     imageRef.current.src = canvas.toDataURL();
   };
 
-  const addPixelToQueue = ({ id, color, remove }) => {
+  const addPixelToQueue = ({ id, color, remove, add }) => {
     const nextPixelsToDraw = pixelsToDraw.current ?? {};
 
     nextPixelsToDraw[id] = color;
@@ -174,14 +190,16 @@ function App() {
 
     if (remove) {
       idsToRemove.current.push(id);
-    } else {
+    }
+
+    if (add) {
       idsToAdd.current.push(id);
     }
   };
 
   const updateImageWhenPossible = useTimeout({
     callback: () => {
-      if (pixelsToDraw.current) {
+      if (idsToRemove.current.length > 0 || idsToAdd.current.length > 0) {
         setLocalPixels((currentPixels) => {
           const nextPixels = { ...currentPixels };
 
@@ -222,11 +240,11 @@ function App() {
     markerRef.current.style.height = `${height}px`;
   };
 
-  const revertPixel = ({ x, y }) => {
+  const revertPixel = ({ x, y, removeFromList = true }) => {
     const id = `${x}-${y}`;
     const color = chainPixels.current[id]?.color ?? "#000";
 
-    addPixelToQueue({ id, color, remove: true });
+    addPixelToQueue({ id, color, remove: removeFromList });
 
     mapCtx.current.fillStyle = color;
     mapCtx.current.fillRect(x, y, 1, 1);
@@ -234,15 +252,47 @@ function App() {
     updateImageWhenPossible();
   };
 
-  const paintPixel = ({ x, y }) => {
+  const paintPixel = ({ x, y, addToList = true }) => {
     const id = `${x}-${y}`;
 
-    addPixelToQueue({ id, color: color.current });
+    addPixelToQueue({ id, color: color.current, add: addToList });
 
     mapCtx.current.fillStyle = color.current;
     mapCtx.current.fillRect(x, y, 1, 1);
 
     updateImageWhenPossible();
+  };
+
+  const updateChainPixel = (_, { returnValues }) => {
+    const pixel = returnValues._paintedPixel;
+
+    if (!pixel) return;
+
+    const pixelInfo = parsePixel(pixel);
+    const { id, color, x, y, owner, paintCount } = pixelInfo;
+
+    chainPixels.current[id] = pixelInfo;
+    setStateChainPixels((stateChainPixels) => ({
+      ...stateChainPixels,
+      [id]: pixelInfo,
+    }));
+
+    revertPixel({ x, y, removeFromList: localPixels[id] });
+
+    if (owner !== window.account) {
+      const price = window.web3.utils.fromWei(`${getPixelPrice(paintCount)}`);
+
+      setAlert({
+        severity: "info",
+        dismissibleTime: 5000,
+        title: (
+          <>
+            <p>{`>_${owner} just painted <${x}, ${y}> in ${color}.`}</p>
+            <p>{`current pixel price is ${price} ETH`}</p>
+          </>
+        ),
+      });
+    }
   };
 
   const getPixelCoordinates = (offsetX = 0, offsetY = 0) => {
@@ -339,6 +389,23 @@ function App() {
     updateImageWhenPossible();
   };
 
+  const setAlert = (alertValue) => {
+    if (alertTimeout.current) {
+      clearTimeout(alertTimeout.current);
+    }
+
+    if (alertValue?.dismissibleTime) {
+      function callback() {
+        initialSetAlert(undefined);
+        alertTimeout.current = undefined;
+      }
+
+      alertTimeout.current = setTimeout(callback, alertValue.dismissibleTime);
+    }
+
+    initialSetAlert(alertValue);
+  };
+
   useEffect(() => {
     const canvas = map.current;
     const ctx = mapCtx.current;
@@ -374,11 +441,12 @@ function App() {
             severity={alert.severity}
             onClose={() => setAlert(undefined)}
           >
+            {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
             {alert.msg}
           </Alert>
         </AlertWrapper>
       )}
-      {connected ? (
+      {pixelsToLoad ? (
         pixelsLoaded ? (
           <>
             <Canvas
@@ -399,12 +467,10 @@ function App() {
             <PixelList
               pixels={localPixels}
               revertPixel={revertPixel}
-              chainPixels={chainPixels}
+              stateChainPixels={stateChainPixels}
               setTransacting={setTransacting}
               transacting={transacting}
               setAlert={setAlert}
-              drawMap={drawMap}
-              chainPixelsAsList={chainPixelsAsList}
             />
           </>
         ) : (
@@ -415,8 +481,8 @@ function App() {
           <Title title={process.env.REACT_APP_NAME} />
           <Connect
             setAlert={setAlert}
-            chainPixelsAsList={chainPixelsAsList}
-            setConnected={setConnected}
+            setPixelsToLoad={setPixelsToLoad}
+            updateChainPixel={updateChainPixel}
           />
         </>
       )}

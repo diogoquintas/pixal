@@ -8,6 +8,16 @@
   --secondary-color: #0000ff;
 }
 
+::-moz-selection {
+  color: white;
+  background: var(--secondary-color);
+}
+
+::selection {
+  color: white;
+  background: var(--secondary-color);
+}
+
 body {
   background: #ca98ff;
   color: white;
@@ -40,11 +50,13 @@ p {
 }
 
 .MuiLoadingButton-loadingIndicator {
-  color: darkgray !important;
+  color: white !important;
 }
 
 .MuiLoadingButton-loading {
-  border-color: #363636 !important;
+  border-color: var(--secondary-color) !important;
+  color: var(--secondary-color) !important;
+  background-color: var(--secondary-color) !important;
   cursor: disabled;
 }
 

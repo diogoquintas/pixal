@@ -44,6 +44,8 @@ const PixelItem = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const priceInEth = window.web3.utils.fromWei(`${price}`);
+
   return (
     <Item
       style={style}
@@ -59,7 +61,7 @@ const PixelItem = ({
           <span>{`[${color}]`}</span>
         </Color>
         <span>{`<${x}, ${y}>`}</span>
-        <Value title={`${price} ETH`}>{`${price} ETH`}</Value>
+        <Value title={`${priceInEth} ETH`}>{`${priceInEth} ETH`}</Value>
         <Delete onClick={() => setToDelete({ x, y, id })}>[x]</Delete>
       </div>
     </Item>
@@ -69,12 +71,10 @@ const PixelItem = ({
 export default function PixelList({
   pixels,
   revertPixel,
-  chainPixels,
+  stateChainPixels,
   setTransacting,
   transacting,
   setAlert,
-  drawMap,
-  chainPixelsAsList,
 }) {
   const [open, setOpen] = useState(false);
   const [deleteQueue, setDeleteQueue] = useState([]);
@@ -87,7 +87,7 @@ export default function PixelList({
       const list = Object.keys(pixels).flatMap((id) => {
         const [x, y] = id.split("-");
 
-        const onChain = chainPixels.current[id];
+        const onChain = stateChainPixels[id];
         const paintCount = onChain?.paintCount ?? 0;
         const price = getPixelPrice(paintCount);
 
@@ -98,7 +98,7 @@ export default function PixelList({
           x,
           y,
           color: pixels[id],
-          address: onChain?.address,
+          owner: onChain?.owner,
           price,
           paintCount,
         };
@@ -109,7 +109,7 @@ export default function PixelList({
       return list;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [pixels]
+    [pixels, stateChainPixels]
   );
 
   const setToDelete = ({ x, y, id }) => {
@@ -143,9 +143,6 @@ export default function PixelList({
           setTransacting={setTransacting}
           pixels={pixelsAsList}
           setAlert={setAlert}
-          deleteAll={deleteAll}
-          drawMap={drawMap}
-          chainPixelsAsList={chainPixelsAsList}
         />
       </ControlsWrapper>
       <ListWrapper open={open}>
@@ -173,7 +170,7 @@ export default function PixelList({
           }}
         />
         <Info>
-          <span>{`>_total= ${total} ETH`}</span>
+          <span>{`>_total= ${window.web3.utils.fromWei(`${total}`)} ETH`}</span>
           <span>{`>_transactions= ${Math.ceil(
             pixelsAsList.length / MAX_PIXELS_PER_TRANSACTION
           )}`}</span>
