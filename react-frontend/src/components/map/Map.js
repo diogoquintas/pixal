@@ -10,19 +10,19 @@ import {
   Marker,
   Wrapper,
 } from "./Map.styles";
-import namehash from "eth-ens-namehash";
+// import namehash from "eth-ens-namehash";
 
-async function reverseName(address) {
-  const lookup = address.toLowerCase().substr(2) + ".addr.reverse";
-  const ResolverContract = await window.web3.eth.ens.resolver(lookup);
-  const nh = namehash.hash(lookup);
+// async function reverseName(address) {
+//   const lookup = address.toLowerCase().substr(2) + ".addr.reverse";
+//   const ResolverContract = await window.web3.eth.ens.resolver(lookup);
+//   const nh = namehash.hash(lookup);
 
-  return ResolverContract.methods.name(nh).call();
-}
+//   return ResolverContract.methods.name(nh).call();
+// }
 
 const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
   const [coordinates, setCoordinates] = useState();
-  const [names, setNames] = useState({});
+  // const [names, setNames] = useState({});
 
   useEffect(() => {
     function handleMouseMove(event) {
@@ -82,7 +82,7 @@ const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
           <p>{`>_price= ${window.web3.utils.fromWei(
             `${getPixelPrice(chainInfo.paintCount ?? 0)}`
           )} ETH`}</p>
-          <p>{`>_painter= ${names[chainInfo.owner] ?? chainInfo.owner}`}</p>
+          <p>{`>_painter= ${chainInfo.owner}`}</p>
         </InfoDiv>
       )}
       <Coordinates
