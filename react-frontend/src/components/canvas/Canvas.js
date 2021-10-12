@@ -51,7 +51,7 @@ const Canvas = forwardRef(
 
       canvasCtx.current = ctx;
 
-      function resetCanvasPosition(options) {
+      function resetCanvasPosition() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
@@ -60,21 +60,17 @@ const Canvas = forwardRef(
         ctx.webkitImageSmoothingEnabled = false;
         ctx.msImageSmoothingEnabled = false;
 
-        position.current = getCanvasPosition(options);
+        position.current = getCanvasPosition(position.current);
 
         setCanvasReady(true);
       }
 
-      function handleCanvasResize() {
-        resetCanvasPosition();
-      }
+      window.addEventListener("resize", resetCanvasPosition);
 
-      document.addEventListener("resize", handleCanvasResize);
-
-      resetCanvasPosition({ resetMouse: true });
+      resetCanvasPosition();
 
       return () => {
-        document.removeEventListener("resize", handleCanvasResize);
+        window.removeEventListener("resize", resetCanvasPosition);
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

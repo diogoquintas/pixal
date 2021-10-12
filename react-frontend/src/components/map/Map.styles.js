@@ -16,6 +16,7 @@ export const Wrapper = styled.div`
 export const Image = styled.img`
   width: 100%;
   height: 100%;
+  user-select: none;
 `;
 
 export const Coordinates = styled.p`

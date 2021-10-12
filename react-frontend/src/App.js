@@ -25,6 +25,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
+const FPS = 30;
 const ZOOM_STRENGTH = 0.5;
 
 export const insideInterval = (coordinate) =>
@@ -55,6 +56,9 @@ function App() {
   const currentMode = useRef(MODE.paint);
   const markerRef = useRef();
   const alertTimeout = useRef();
+  const chainPixelsToUpdate = useRef({});
+  const pixelToAlert = useRef();
+  const timeSinceLastDraw = useRef(0);
 
   const parsePixel = (pixel) => {
     const {
@@ -74,7 +78,13 @@ function App() {
     };
   };
 
-  const draw = () => {
+  const draw = (time) => {
+    requestAnimationFrame(draw);
+
+    if (time - timeSinceLastDraw.current < 1000 / FPS) return;
+
+    timeSinceLastDraw.current = time;
+
     const canvas = canvasRef.current;
     const ctx = canvasCtx.current;
 
@@ -113,6 +123,13 @@ function App() {
         size.current * zoom,
         size.current * zoom
       );
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(
+        (x - Math.floor(size.current / 2) - xMin) * zoom,
+        (y - Math.floor(size.current / 2) - yMin) * zoom,
+        size.current * zoom,
+        size.current * zoom
+      );
     } else if (currentMode.current === MODE.delete) {
       ctx.strokeStyle = SECONDARY_COLOR;
       ctx.strokeRect(
@@ -122,8 +139,6 @@ function App() {
         size.current * zoom
       );
     }
-
-    requestAnimationFrame(draw);
   };
 
   const drawMap = () => {
@@ -190,35 +205,74 @@ function App() {
 
     if (remove) {
       idsToRemove.current.push(id);
+      updateLocalPixelsWhenPossible();
     }
 
     if (add) {
       idsToAdd.current.push(id);
+      updateLocalPixelsWhenPossible();
     }
   };
 
   const updateImageWhenPossible = useTimeout({
     callback: () => {
-      if (idsToRemove.current.length > 0 || idsToAdd.current.length > 0) {
-        setLocalPixels((currentPixels) => {
-          const nextPixels = { ...currentPixels };
-
-          idsToRemove.current.forEach((id) => delete nextPixels[id]);
-          idsToAdd.current.forEach(
-            (id) => (nextPixels[id] = pixelsToDraw.current[id])
-          );
-
-          storageUpdatePixels(nextPixels);
-
-          return nextPixels;
-        });
-      }
-
       imageRef.current.src = map.current.toDataURL();
 
       pixelsToDraw.current = undefined;
+    },
+  });
+
+  const updateLocalPixelsWhenPossible = useTimeout({
+    callback: () => {
+      if (idsToRemove.current.length === 0 && idsToAdd.current.length === 0)
+        return;
+
+      setLocalPixels((currentPixels) => {
+        const nextPixels = { ...currentPixels };
+
+        idsToRemove.current.forEach((id) => delete nextPixels[id]);
+        idsToAdd.current.forEach(
+          (id) => (nextPixels[id] = pixelsToDraw.current[id])
+        );
+
+        storageUpdatePixels(nextPixels);
+
+        return nextPixels;
+      });
+
       idsToRemove.current = [];
       idsToAdd.current = [];
+    },
+  });
+
+  const updateChainPixelsWhenPossible = useTimeout({
+    callback: () => {
+      if (Object.keys(chainPixelsToUpdate.current).length === 0) return;
+
+      setStateChainPixels((stateChainPixels) => ({
+        ...stateChainPixels,
+        ...chainPixelsToUpdate.current,
+      }));
+
+      chainPixelsToUpdate.current = {};
+
+      if (pixelToAlert.current) {
+        const { paintCount, x, y, owner, color } = pixelToAlert.current;
+        const price = window.web3.utils.fromWei(`${getPixelPrice(paintCount)}`);
+
+        setAlert({
+          severity: "info",
+          dismissibleTime: 5000,
+          title: (
+            <>
+              <p>{`>_${owner} just painted <${x}, ${y}> in ${color}.`}</p>
+              <p>{`current pixel price is ${price} ETH`}</p>
+            </>
+          ),
+        });
+
+        pixelToAlert.current = undefined;
+      }
     },
   });
 
@@ -269,30 +323,20 @@ function App() {
     if (!pixel) return;
 
     const pixelInfo = parsePixel(pixel);
-    const { id, color, x, y, owner, paintCount } = pixelInfo;
+    const { id, x, y, owner } = pixelInfo;
+
+    const isFromAccount = owner === window.account;
 
     chainPixels.current[id] = pixelInfo;
-    setStateChainPixels((stateChainPixels) => ({
-      ...stateChainPixels,
-      [id]: pixelInfo,
-    }));
+    chainPixelsToUpdate.current[id] = pixelInfo;
 
-    revertPixel({ x, y, removeFromList: localPixels[id] });
+    revertPixel({ x, y, removeFromList: isFromAccount });
 
-    if (owner !== window.account) {
-      const price = window.web3.utils.fromWei(`${getPixelPrice(paintCount)}`);
-
-      setAlert({
-        severity: "info",
-        dismissibleTime: 5000,
-        title: (
-          <>
-            <p>{`>_${owner} just painted <${x}, ${y}> in ${color}.`}</p>
-            <p>{`current pixel price is ${price} ETH`}</p>
-          </>
-        ),
-      });
+    if (!isFromAccount) {
+      pixelToAlert.current = pixelInfo;
     }
+
+    updateChainPixelsWhenPossible();
   };
 
   const getPixelCoordinates = (offsetX = 0, offsetY = 0) => {
@@ -348,7 +392,6 @@ function App() {
       Math.max(nextPosition.minZoom, nextPosition.zoom - delta * ZOOM_STRENGTH),
       nextPosition.maxZoom
     );
-
     nextPosition.xOffscreen =
       BOARD_SIZE * nextPosition.zoom - window.innerWidth;
     nextPosition.yOffscreen =
@@ -359,12 +402,10 @@ function App() {
       y: nextPosition.mouseY / nextPosition.zoom,
     };
 
-    const xMin = nextPosition.xMin + (mouseBeforeZoom.x - mouseAfterZoom.x);
-    const yMin = nextPosition.yMin + (mouseBeforeZoom.y - mouseAfterZoom.y);
-
-    nextPosition.xMin = xMin;
-    nextPosition.yMin = yMin;
-
+    nextPosition.xMin =
+      nextPosition.xMin + (mouseBeforeZoom.x - mouseAfterZoom.x);
+    nextPosition.yMin =
+      nextPosition.yMin + (mouseBeforeZoom.y - mouseAfterZoom.y);
     nextPosition.offsetX = -(nextPosition.xMin * nextPosition.zoom);
     nextPosition.offsetY = -(nextPosition.yMin * nextPosition.zoom);
 
@@ -376,11 +417,8 @@ function App() {
   const updatePosition = (x, y) => {
     const nextPosition = {};
 
-    const nextX = position.current.offsetX - x;
-    const nextY = position.current.offsetY - y;
-
-    nextPosition.offsetX = nextX;
-    nextPosition.offsetY = nextY;
+    nextPosition.offsetX = position.current.offsetX - x;
+    nextPosition.offsetY = position.current.offsetY - y;
     nextPosition.xMin = -(nextPosition.offsetX / position.current.zoom);
     nextPosition.yMin = -(nextPosition.offsetY / position.current.zoom);
 
@@ -421,6 +459,7 @@ function App() {
 
   useEffect(() => {
     if (canvasReady) {
+      timeSinceLastDraw.current = performance.now();
       draw();
       document.body.classList.add("canvas-ready");
       updateMarker();

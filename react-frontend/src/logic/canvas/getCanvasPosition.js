@@ -1,10 +1,10 @@
 import { BOARD_SIZE } from "../../App";
 
-export default function getCanvasPosition({ resetMouse } = {}) {
+export default function getCanvasPosition(previousPosition) {
   const zoomX = window.innerWidth / (BOARD_SIZE + 2);
   const zoomY = window.innerHeight / (BOARD_SIZE + 2);
 
-  const position = {};
+  const position = { ...previousPosition };
 
   position.zoom = Math.max(zoomX, zoomY);
 
@@ -19,7 +19,10 @@ export default function getCanvasPosition({ resetMouse } = {}) {
   position.xMin = -(position.offsetX / position.zoom);
   position.yMin = -(position.offsetY / position.zoom);
 
-  if (resetMouse) {
+  if (
+    previousPosition.mouseX === undefined ||
+    previousPosition.mouseY === undefined
+  ) {
     position.mouseX = window.innerWidth / 2;
     position.mouseY = window.innerHeight / 2;
   }

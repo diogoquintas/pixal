@@ -5,7 +5,7 @@ export const AlertWrapper = styled.div`
   position: fixed;
   top: 1rem;
   right: 1rem;
-  width: 32rem;
+  max-width: 32rem;
   display: flex;
   justify-content: center;
 

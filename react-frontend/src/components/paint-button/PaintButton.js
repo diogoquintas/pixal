@@ -24,7 +24,7 @@ export default function PaintButton({
           setTransacting(false);
 
           setAlert({
-            msg: ">_congrats on your transaction!",
+            msg: ">_done! congrats on your painting skills",
             severity: "success",
             dismissibleTime: 3000,
           });
@@ -32,7 +32,7 @@ export default function PaintButton({
           setAlert({
             msg: <ErrorPre>{err.message}</ErrorPre>,
             title:
-              ">_an error occurred in your transaction, please check if your wallet and account are correctly connected.",
+              ">_an error occurred in one of your transactions, please check if your wallet and account are correctly connected.",
             severity: "error",
           });
           setTransacting(false);

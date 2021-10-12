@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-export default function useTimeout({ callback, number = 666 }) {
+export default function useTimeout({ callback, number = 500 }) {
   const timeout = useRef();
 
   return () => {
