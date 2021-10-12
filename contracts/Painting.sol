@@ -5,13 +5,13 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 struct Coordinates {
-    uint256 x;
-    uint256 y;
+    uint16 x;
+    uint16 y;
 }
 
 struct PixelInfo {
     string color;
-    uint256 paintCount;
+    uint256 count;
     Coordinates coordinates;
     address payable owner;
 }
@@ -22,10 +22,9 @@ struct Pixel {
 }
 
 contract Painting is ReentrancyGuard, Ownable {
-    // The size of the image is axisSize X axisSize
-    uint16 constant axisSize = 1000;
-    uint256 constant referencePrice = 0.00001 ether;
     uint8 constant pricePowerCap = 11;
+    uint16 constant boundary = 1000;
+    uint256 constant referencePrice = 0.00001 ether;
 
     PixelInfo[] pixels;
 
@@ -34,96 +33,82 @@ contract Painting is ReentrancyGuard, Ownable {
 
     event PixelPainted(PixelInfo _paintedPixel);
 
-    function pixelId(Coordinates memory _coordinates)
+    function pixelId(Coordinates memory coordinates)
         internal
         view
         virtual
         returns (bytes memory)
     {
-        return abi.encodePacked(_coordinates.x, _coordinates.y);
+        return abi.encodePacked(coordinates.x, coordinates.y);
     }
 
-    function pixelPosition(Coordinates memory _coordinates)
+    function pixelPosition(Coordinates memory coordinates)
         public
         view
         virtual
         returns (uint256)
     {
-        bytes memory _pixelId = pixelId(_coordinates);
+        bytes memory id = pixelId(coordinates);
 
-        return pixelPositionById[_pixelId];
+        return pixelPositionById[id];
     }
 
-    function pixelInfo(Coordinates memory _coordinates)
+    function pixelInfo(Coordinates memory coordinates)
         public
         view
         virtual
         returns (PixelInfo memory)
     {
-        uint256 _pixelPosition = pixelPosition(_coordinates);
+        uint256 position = pixelPosition(coordinates);
 
-        require(_pixelPosition > 0, "Pixel does not exist");
+        require(position > 0, "Pixel does not exist");
 
-        return pixels[_pixelPosition - 1];
+        return pixels[position - 1];
     }
 
-    function pixelPrice(uint256 _paintCount)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        if (_paintCount >= pricePowerCap) {
+    function pixelPrice(uint256 count) public view virtual returns (uint256) {
+        if (count >= pricePowerCap) {
             return referencePrice * 10**pricePowerCap;
         }
 
-        return referencePrice * 10**_paintCount;
+        return referencePrice * 10**count;
     }
 
-    function amountToReceive(uint256 _pixelPrice)
-        internal
-        pure
-        returns (uint256)
-    {
-        return (_pixelPrice * 3) / 4;
+    function ownerShare(uint256 price) public view virtual returns (uint256) {
+        return (price * 3) / 4;
     }
 
     function paint(
-        Coordinates memory _coordinates,
-        string memory _color,
-        uint256 _funds
+        Coordinates memory coordinates,
+        string memory color,
+        uint256 funds
     ) internal returns (uint256) {
         require(
-            _coordinates.x < axisSize && _coordinates.y < axisSize,
+            coordinates.x < boundary && coordinates.y < boundary,
             "Coordinates out of range"
         );
 
-        uint256 _pixelPosition = pixelPosition(_coordinates);
+        uint256 position = pixelPosition(coordinates);
 
-        if (_pixelPosition > 0) {
-            uint256 _pixelIndex = _pixelPosition - 1;
-            address payable _receiver = pixels[_pixelIndex].owner;
-            uint256 _pixelPrice = pixelPrice(pixels[_pixelIndex].paintCount);
+        if (position > 0) {
+            uint256 index = position - 1;
+            uint256 price = pixelPrice(pixels[index].count);
+            address payable previousOwner = pixels[index].owner;
 
-            require(
-                _funds >= _pixelPrice && _funds - _pixelPrice >= 0,
-                "Not enough funds"
-            );
+            require(funds >= price && funds - price >= 0, "Not enough funds");
 
-            pixels[_pixelIndex].color = _color;
-            pixels[_pixelIndex].owner = payable(msg.sender);
-            pixels[_pixelIndex].paintCount += 1;
+            pixels[index].color = color;
+            pixels[index].owner = payable(msg.sender);
+            pixels[index].count += 1;
 
-            _receiver.transfer(amountToReceive(_pixelPrice));
+            previousOwner.transfer(ownerShare(price));
 
-            emit PixelPainted(pixels[_pixelIndex]);
+            emit PixelPainted(pixels[index]);
 
-            return _pixelPrice;
+            return price;
         } else {
-            pixelPositionById[pixelId(_coordinates)] = pixels.length + 1;
-            pixels.push(
-                PixelInfo(_color, 1, _coordinates, payable(msg.sender))
-            );
+            pixelPositionById[pixelId(coordinates)] = pixels.length + 1;
+            pixels.push(PixelInfo(color, 1, coordinates, payable(msg.sender)));
 
             emit PixelPainted(pixels[pixels.length - 1]);
 
@@ -131,62 +116,45 @@ contract Painting is ReentrancyGuard, Ownable {
         }
     }
 
-    function paintPixels(Pixel[] memory _pixels) public payable nonReentrant {
+    function paintPixels(Pixel[] memory pixelsToPaint)
+        public
+        payable
+        nonReentrant
+    {
         uint256 funds = msg.value;
 
-        for (uint256 _i = 0; _i < _pixels.length; _i++) {
-            uint256 _pixelPrice = paint(
-                _pixels[_i].coordinates,
-                _pixels[_i].color,
+        for (uint256 i = 0; i < pixelsToPaint.length; i++) {
+            uint256 expendedFunds = paint(
+                pixelsToPaint[i].coordinates,
+                pixelsToPaint[i].color,
                 funds
             );
 
-            funds -= _pixelPrice;
+            funds -= expendedFunds;
         }
     }
 
-    function pixelsPrice(Pixel[] memory _pixels)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        uint256 _price = 0;
-
-        for (uint256 _i = 0; _i < _pixels.length; _i++) {
-            uint256 _pixelPosition = pixelPosition(_pixels[_i].coordinates);
-
-            if (_pixelPosition > 0) {
-                PixelInfo memory _pixel = pixels[_pixelPosition + 1];
-
-                _price += pixelPrice(_pixel.paintCount);
-            }
-        }
-
-        return _price;
-    }
-
-    function pixelsInfo(uint256 _page, uint256 _pageSize)
+    function pixelsInfo(uint256 page, uint256 pageSize)
         public
         view
         virtual
         returns (PixelInfo[] memory)
     {
-        require(_page > 0, "Page must be higher than 0");
+        require(page > 0, "Page must be higher than 0");
 
-        PixelInfo[] memory _pixels = new PixelInfo[](_pageSize);
-        uint256 _pixelIndex = (_page - 1) * _pageSize;
+        PixelInfo[] memory result = new PixelInfo[](pageSize);
+        uint256 pixelIndex = (page - 1) * pageSize;
 
-        for (uint256 _pointer = 0; _pointer < _pageSize; _pointer++) {
-            if (pixels.length > _pixelIndex) {
-                _pixels[_pointer] = pixels[_pixelIndex];
-                _pixelIndex++;
+        for (uint256 i = 0; i < pageSize; i++) {
+            if (pixels.length > pixelIndex) {
+                result[i] = pixels[pixelIndex];
+                pixelIndex++;
             } else {
-                return _pixels;
+                return result;
             }
         }
 
-        return _pixels;
+        return result;
     }
 
     function pixelsCount() public view virtual returns (uint256) {
