@@ -30,20 +30,20 @@
           },
           {
             "internalType": "uint256",
-            "name": "paintCount",
+            "name": "count",
             "type": "uint256"
           },
           {
             "components": [
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "x",
-                "type": "uint256"
+                "type": "uint16"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "y",
-                "type": "uint256"
+                "type": "uint16"
               }
             ],
             "internalType": "struct Coordinates",
@@ -66,54 +66,6 @@
     "type": "event"
   },
   {
-    "inputs": [
-      {
-        "components": [
-          {
-            "internalType": "string",
-            "name": "color",
-            "type": "string"
-          },
-          {
-            "components": [
-              {
-                "internalType": "uint256",
-                "name": "x",
-                "type": "uint256"
-              },
-              {
-                "internalType": "uint256",
-                "name": "y",
-                "type": "uint256"
-              }
-            ],
-            "internalType": "struct Coordinates",
-            "name": "coordinates",
-            "type": "tuple"
-          }
-        ],
-        "internalType": "struct Pixel[]",
-        "name": "_pixels",
-        "type": "tuple[]"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "canAfford",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "owner",
     "outputs": [
@@ -129,6 +81,25 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      }
+    ],
+    "name": "ownerShare",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "components": [
           {
             "internalType": "string",
@@ -138,14 +109,14 @@
           {
             "components": [
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "x",
-                "type": "uint256"
+                "type": "uint16"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "y",
-                "type": "uint256"
+                "type": "uint16"
               }
             ],
             "internalType": "struct Coordinates",
@@ -154,7 +125,7 @@
           }
         ],
         "internalType": "struct Pixel[]",
-        "name": "_pixels",
+        "name": "pixelsToPaint",
         "type": "tuple[]"
       }
     ],
@@ -168,18 +139,18 @@
       {
         "components": [
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "x",
-            "type": "uint256"
+            "type": "uint16"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "y",
-            "type": "uint256"
+            "type": "uint16"
           }
         ],
         "internalType": "struct Coordinates",
-        "name": "_coordinates",
+        "name": "coordinates",
         "type": "tuple"
       }
     ],
@@ -194,20 +165,20 @@
           },
           {
             "internalType": "uint256",
-            "name": "paintCount",
+            "name": "count",
             "type": "uint256"
           },
           {
             "components": [
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "x",
-                "type": "uint256"
+                "type": "uint16"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "y",
-                "type": "uint256"
+                "type": "uint16"
               }
             ],
             "internalType": "struct Coordinates",
@@ -233,18 +204,18 @@
       {
         "components": [
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "x",
-            "type": "uint256"
+            "type": "uint16"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "y",
-            "type": "uint256"
+            "type": "uint16"
           }
         ],
         "internalType": "struct Coordinates",
-        "name": "_coordinates",
+        "name": "coordinates",
         "type": "tuple"
       }
     ],
@@ -263,7 +234,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_paintCount",
+        "name": "count",
         "type": "uint256"
       }
     ],
@@ -295,12 +266,12 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_page",
+        "name": "page",
         "type": "uint256"
       },
       {
         "internalType": "uint256",
-        "name": "_pageSize",
+        "name": "pageSize",
         "type": "uint256"
       }
     ],
@@ -315,20 +286,20 @@
           },
           {
             "internalType": "uint256",
-            "name": "paintCount",
+            "name": "count",
             "type": "uint256"
           },
           {
             "components": [
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "x",
-                "type": "uint256"
+                "type": "uint16"
               },
               {
-                "internalType": "uint256",
+                "internalType": "uint16",
                 "name": "y",
-                "type": "uint256"
+                "type": "uint16"
               }
             ],
             "internalType": "struct Coordinates",

@@ -23,7 +23,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
-const FPS = 5;
+const FPS = 30;
 const ZOOM_STRENGTH = 0.5;
 
 export const insideInterval = (coordinate) =>
