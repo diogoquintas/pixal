@@ -136,7 +136,7 @@ export default function PixelList({
           {open ? <Minus /> : <Plus />}
         </Control>
         <Control variant="text" onClick={deleteAll}>
-          Delete all
+          Clear all
         </Control>
         <PaintButton
           transacting={transacting}
@@ -170,8 +170,8 @@ export default function PixelList({
           }}
         />
         <Info>
-          <span>{`>_total= ${window.web3.utils.fromWei(`${total}`)} ETH`}</span>
-          <span>{`>_transactions= ${Math.ceil(
+          <span>{`total=${window.web3.utils.fromWei(`${total}`)} ETH`}</span>
+          <span>{`transactions=${Math.ceil(
             pixelsAsList.length / MAX_PIXELS_PER_TRANSACTION
           )}`}</span>
         </Info>

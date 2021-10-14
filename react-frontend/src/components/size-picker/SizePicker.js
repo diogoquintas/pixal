@@ -9,7 +9,7 @@ const Wrapper = styled.div`
   flex: 1;
   display: flex;
   align-items: center;
-  margin-left: 0.5rem;
+  margin-right: 0.5rem;
 
   & > span {
     margin: 0 0.5rem;

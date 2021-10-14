@@ -1,4 +1,3 @@
-import LoadingButton from "@mui/lab/LoadingButton";
 import { useState } from "react";
 import Web3 from "web3";
 import getPixels from "../../logic/blockchain/getPixels";
@@ -11,6 +10,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ErrorPre } from "../../App.styles";
+import Help from "../help/Help";
+import { ConnectButton } from "./Connect.styles";
 
 function isMobileDevice() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
@@ -134,14 +135,17 @@ export default function Connect({
 
   return (
     <>
-      <LoadingButton
-        color="secondary"
-        variant="contained"
-        loading={connecting}
-        onClick={connect}
-      >
-        Connect
-      </LoadingButton>
+      <div>
+        <ConnectButton
+          color="secondary"
+          variant="contained"
+          loading={connecting}
+          onClick={connect}
+        >
+          Connect
+        </ConnectButton>
+        <Help />
+      </div>
       <Dialog open={showWalletModal}>
         <DialogTitle>Please install a wallet</DialogTitle>
         <DialogContent>

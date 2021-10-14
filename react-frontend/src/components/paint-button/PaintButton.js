@@ -11,7 +11,7 @@ export default function PaintButton({
 }) {
   return (
     <Control
-      variant="outlined"
+      variant="contained"
       disabled={transacting}
       onClick={async () => {
         setTransacting(true);
@@ -39,7 +39,7 @@ export default function PaintButton({
         }
       }}
     >
-      {transacting ? "Painting on-chain" : "Paint on-chain"}
+      {transacting ? "Painting" : "Paint"}
     </Control>
   );
 }

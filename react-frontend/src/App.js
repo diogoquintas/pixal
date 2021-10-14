@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
 import { storageGetPixels, storageUpdatePixels } from "./logic/storage/pixels";
 import Canvas from "./components/canvas/Canvas";
 import Loading from "./components/loading/Loading";
@@ -12,7 +11,6 @@ import Connect from "./components/connect/Connect";
 import PixelList, { getPixelPrice } from "./components/pixel-list/PixelList";
 import Map from "./components/map/Map";
 import { MIN_SIZE } from "./components/size-picker/SizePicker";
-import { MAP_SIZE } from "./components/map/Map.styles";
 import { AlertTitle } from "@mui/material";
 
 export const BOARD_SIZE = 1000;
@@ -25,7 +23,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
-const FPS = 30;
+const FPS = 5;
 const ZOOM_STRENGTH = 0.5;
 
 export const insideInterval = (coordinate) =>
@@ -50,7 +48,7 @@ function App() {
   const pixelsToDraw = useRef();
   const idsToRemove = useRef([]);
   const idsToAdd = useRef([]);
-  const color = useRef(MAIN_COLOR);
+  const color = useRef(SECONDARY_COLOR);
   const size = useRef(MIN_SIZE);
   const chainPixels = useRef({});
   const currentMode = useRef(MODE.paint);
@@ -277,16 +275,20 @@ function App() {
   });
 
   const updateMarker = () => {
-    if (!markerRef) return;
+    if (!markerRef.current || !imageRef.current) return;
 
-    const left = (position.current.xMin * MAP_SIZE) / BOARD_SIZE;
-    const top = (position.current.yMin * MAP_SIZE) / BOARD_SIZE;
+    const rect = imageRef.current.getBoundingClientRect();
+    const mapWidth = rect.width;
+    const mapHeight = rect.height;
+
+    const left = (position.current.xMin * mapWidth) / BOARD_SIZE;
+    const top = (position.current.yMin * mapHeight) / BOARD_SIZE;
 
     const boardWidth = window.innerWidth / position.current.zoom;
     const boardHeight = window.innerHeight / position.current.zoom;
 
-    const width = (boardWidth * MAP_SIZE) / BOARD_SIZE;
-    const height = (boardHeight * MAP_SIZE) / BOARD_SIZE;
+    const width = (boardWidth * mapWidth) / BOARD_SIZE;
+    const height = (boardHeight * mapHeight) / BOARD_SIZE;
 
     markerRef.current.style.top = `${top}px`;
     markerRef.current.style.left = `${left}px`;
@@ -462,7 +464,6 @@ function App() {
       timeSinceLastDraw.current = performance.now();
       draw();
       document.body.classList.add("canvas-ready");
-      updateMarker();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasReady]);
@@ -501,6 +502,7 @@ function App() {
               setMode={setMode}
               mode={mode}
               canvasReady={canvasReady}
+              updateMarker={updateMarker}
             />
             <Controls mode={mode} setMode={setMode} color={color} size={size} />
             <PixelList

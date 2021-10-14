@@ -28,7 +28,7 @@ export default function useClickInteraction({
           y: event.clientY,
         };
       } else {
-        interact(event);
+        interact();
       }
 
       clickingOnCanvas.current = true;
@@ -52,7 +52,7 @@ export default function useClickInteraction({
           y: event.clientY,
         };
       } else {
-        interact(event);
+        interact();
       }
     }
 

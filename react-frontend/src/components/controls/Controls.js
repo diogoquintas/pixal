@@ -1,26 +1,44 @@
+import { useState } from "react";
 import { MODE } from "../../App";
 import ColorPicker from "../color-picker/ColorPicker";
-import Arrows from "../icons/Arrows";
+import Cursor from "../icons/Cursor";
 import Eraser from "../icons/Eraser";
 import Pencil from "../icons/Pencil";
 import SizePicker from "../size-picker/SizePicker";
 import { Control, Wrapper, Pickers } from "./Controls.styles";
+import HelpDialog from "./HelpDialog";
 
 export default function Controls({ mode, setMode, color, size }) {
+  const [openHelp, setOpenHelp] = useState(false);
+
   const isDelete = mode === MODE.delete;
   const isMove = mode === MODE.move;
   const isPaint = mode === MODE.paint;
 
   return (
     <Wrapper>
+      {(isPaint || isDelete) && (
+        <Pickers>
+          <SizePicker size={size} />
+          {isPaint && <ColorPicker color={color} />}
+        </Pickers>
+      )}
       <div>
+        <Control
+          onClick={() => setOpenHelp(true)}
+          variant="outlined"
+          aria-label="Help"
+          title="Help"
+        >
+          ?
+        </Control>
         <Control
           onClick={() => setMode(MODE.move)}
           variant={isMove ? "contained" : "outlined"}
           aria-label="Set to move"
           title="Set to move"
         >
-          <Arrows />
+          <Cursor />
         </Control>
         <Control
           onClick={() => setMode(MODE.delete)}
@@ -39,12 +57,7 @@ export default function Controls({ mode, setMode, color, size }) {
           <Pencil />
         </Control>
       </div>
-      {(isPaint || isDelete) && (
-        <Pickers>
-          <ColorPicker color={color} />
-          <SizePicker size={size} />
-        </Pickers>
-      )}
+      <HelpDialog open={openHelp} onClose={() => setOpenHelp(false)} />
     </Wrapper>
   );
 }

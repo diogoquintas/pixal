@@ -1,15 +1,20 @@
+/** @jsxImportSource @emotion/react */
 import { forwardRef, useEffect, useState } from "react";
 import { BOARD_SIZE, insideInterval } from "../../App";
+import useViewport from "../../logic/useViewport";
+import { mobile } from "../../styles/media";
 import { getPixelPrice } from "../pixel-list/PixelList";
 import {
   Coordinates,
   Image,
-  InfoDiv,
   MapWrapper,
-  MAP_SIZE,
   Marker,
-  Wrapper,
+  MapButton,
+  InfoWrapper,
+  CoordinatesWrapper,
 } from "./Map.styles";
+import MapIcon from "../icons/Map";
+import { css } from "@emotion/react";
 // import namehash from "eth-ens-namehash";
 
 // async function reverseName(address) {
@@ -20,7 +25,12 @@ import {
 //   return ResolverContract.methods.name(nh).call();
 // }
 
-const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
+const MouseController = ({
+  position,
+  getPixelCoordinates,
+  chainPixels,
+  ready,
+}) => {
   const [coordinates, setCoordinates] = useState();
   // const [names, setNames] = useState({});
 
@@ -67,33 +77,80 @@ const MouseController = ({ position, getPixelCoordinates, chainPixels }) => {
   //   // eslint-disable-next-line react-hooks/exhaustive-deps
   // }, [coordinates]);
 
-  if (!coordinates) return null;
+  if (!coordinates || !ready) return null;
 
   const { x, y } = coordinates;
   const chainInfo = chainPixels.current?.[`${x}-${y}`];
 
   return (
-    <>
+    <InfoWrapper>
       {chainInfo && (
-        <InfoDiv>
-          <p>{`>_painted ${chainInfo.paintCount} time${
+        <>
+          <p>{`painted ${chainInfo.paintCount} time${
             chainInfo.paintCount === 1 ? "" : "s"
           }`}</p>
-          <p>{`>_price= ${window.web3.utils.fromWei(
+          <p>{`price=${window.web3.utils.fromWei(
             `${getPixelPrice(chainInfo.paintCount ?? 0)}`
           )} ETH`}</p>
-          <p>{`>_painter= ${chainInfo.owner}`}</p>
-        </InfoDiv>
+          <p>{`painter=${chainInfo.owner}`}</p>
+        </>
       )}
-      <Coordinates
-        color={chainInfo?.color}
-        isOutside={!insideInterval(x) || !insideInterval(y)}
-      >
-        <span>{`<${x}, ${y}>`}</span>
-      </Coordinates>
-    </>
+      <CoordinatesWrapper>
+        <Coordinates
+          color={chainInfo?.color}
+          isOutside={!insideInterval(x) || !insideInterval(y)}
+        >
+          <span>{`<${x}, ${y}>`}</span>
+        </Coordinates>
+      </CoordinatesWrapper>
+    </InfoWrapper>
   );
 };
+
+function MapImage({
+  position,
+  updatePosition,
+  onClick,
+  markerRef,
+  imageRef,
+  ...remainingProps
+}) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <MapWrapper canShow={loaded} {...remainingProps}>
+      <Image
+        onLoad={() => setLoaded(true)}
+        ref={imageRef}
+        alt="Map"
+        onClick={(event) => {
+          const rect = event.target.getBoundingClientRect();
+
+          const layerX = event.clientX - rect.left;
+          const layerY = event.clientY - rect.top;
+
+          const x = Math.floor((layerX * BOARD_SIZE) / rect.width);
+          const y = Math.floor((layerY * BOARD_SIZE) / rect.height);
+
+          const canvasX = x * position.current.zoom;
+          const canvasY = y * position.current.zoom;
+
+          const currentMiddleX =
+            -position.current.offsetX + window.innerWidth / 2;
+          const currentMiddleY =
+            -position.current.offsetY + window.innerHeight / 2;
+
+          const diffX = canvasX - currentMiddleX;
+          const diffY = canvasY - currentMiddleY;
+
+          updatePosition(diffX, diffY);
+          onClick?.();
+        }}
+      />
+      <Marker ref={markerRef} />
+    </MapWrapper>
+  );
+}
 
 const Map = forwardRef(
   (
@@ -107,46 +164,42 @@ const Map = forwardRef(
     },
     ref
   ) => {
-    const [loaded, setLoaded] = useState(false);
+    const [mapOpen, setMapOpen] = useState(false);
+
+    const isMobile = useViewport(mobile);
 
     return (
-      <Wrapper>
+      <>
         <MouseController
+          ready={ready}
           position={position}
           getPixelCoordinates={getPixelCoordinates}
           chainPixels={chainPixels}
         />
-        <MapWrapper canShow={loaded && ready}>
-          <Image
-            onLoad={() => setLoaded(true)}
-            ref={ref}
-            alt="Map"
-            onClick={(event) => {
-              const rect = event.target.getBoundingClientRect();
-
-              const layerX = event.clientX - rect.left;
-              const layerY = event.clientY - rect.top;
-
-              const x = Math.floor((layerX * BOARD_SIZE) / MAP_SIZE);
-              const y = Math.floor((layerY * BOARD_SIZE) / MAP_SIZE);
-
-              const canvasX = x * position.current.zoom;
-              const canvasY = y * position.current.zoom;
-
-              const currentMiddleX =
-                -position.current.offsetX + window.innerWidth / 2;
-              const currentMiddleY =
-                -position.current.offsetY + window.innerHeight / 2;
-
-              const diffX = canvasX - currentMiddleX;
-              const diffY = canvasY - currentMiddleY;
-
-              updatePosition(diffX, diffY);
-            }}
-          />
-          <Marker ref={markerRef} />
-        </MapWrapper>
-      </Wrapper>
+        {isMobile && ready && (
+          <MapButton variant="outlined" onClick={() => setMapOpen(!mapOpen)}>
+            <MapIcon />
+          </MapButton>
+        )}
+        <MapImage
+          css={
+            isMobile &&
+            css`
+              top: 4rem;
+              left: 1rem;
+              width: calc(100% - 2rem);
+              padding-top: 50%;
+              transform: translateX(${mapOpen ? 0 : "-150%"});
+              transition: linear transform 300ms;
+            `
+          }
+          position={position}
+          updatePosition={updatePosition}
+          markerRef={markerRef}
+          imageRef={ref}
+          onClick={() => setMapOpen(false)}
+        />
+      </>
     );
   }
 );

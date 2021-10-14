@@ -81,7 +81,7 @@ export const ListWrapper = styled.div`
   transition: transform 150ms ease;
   margin-bottom: 0.5rem;
   background: black;
-  border: 0.1rem solid var(--main-color);
+  border: 0.1rem solid white;
 `;
 
 export const Color = styled.div`

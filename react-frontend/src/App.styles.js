@@ -1,16 +1,23 @@
 import styled from "@emotion/styled";
 import hideScrollbar from "./styles/hideScrollbar";
+import { mobileMediaScreen } from "./styles/media";
 
 export const AlertWrapper = styled.div`
   position: fixed;
   top: 1rem;
-  right: 1rem;
+  left: 1rem;
   max-width: 32rem;
   display: flex;
   justify-content: center;
+  text-transform: initial;
+  z-index: 1;
 
   & a {
     color: white;
+  }
+
+  ${mobileMediaScreen} {
+    width: calc(100% - 2rem);
   }
 `;
 

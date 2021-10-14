@@ -14,7 +14,7 @@ const StyledCanvas = styled.canvas`
     isMove &&
     !isTransacting &&
     css`
-      cursor: move;
+      cursor: cell;
     `}
 
   ${({ transacting }) =>
@@ -38,6 +38,7 @@ const Canvas = forwardRef(
       setMode,
       mode,
       canvasReady,
+      updateMarker,
     },
     ref
   ) => {
@@ -63,6 +64,7 @@ const Canvas = forwardRef(
         position.current = getCanvasPosition(position.current);
 
         setCanvasReady(true);
+        updateMarker();
       }
 
       window.addEventListener("resize", resetCanvasPosition);
@@ -94,6 +96,7 @@ const Canvas = forwardRef(
       setMode,
       updatePosition,
       updateZoom,
+      interact,
       disabled: !canvasReady,
     });
 

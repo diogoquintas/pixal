@@ -1,5 +1,4 @@
 import { createTheme } from "@mui/material/styles";
-import { MAIN_COLOR, SECONDARY_COLOR } from "../App";
 
 const theme = createTheme({
   typography: {
@@ -7,19 +6,19 @@ const theme = createTheme({
   },
   palette: {
     primary: {
-      main: MAIN_COLOR,
+      main: "#fff",
     },
     secondary: {
-      main: SECONDARY_COLOR,
+      main: "#000",
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         outlined: {
-          backgroundColor: "black",
+          backgroundColor: "#00000080",
           ":hover": {
-            backgroundColor: "black",
+            backgroundColor: "#00000080",
           },
         },
       },

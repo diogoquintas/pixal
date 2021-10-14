@@ -42,21 +42,16 @@ const H1 = styled.h1`
   }
 
   ${({ animate }) =>
-    animate
-      ? css`
-          font-size: 62rem;
-          animation: ${marquiesh} 82s linear 10ms forwards;
-          cursor: url("stop.png"), pointer;
+    animate &&
+    css`
+      font-size: 62rem;
+      animation: ${marquiesh} 82s linear 10ms forwards;
+      cursor: url("stop.png"), pointer;
 
-          @media only screen and (max-width: 768px) {
-            font-size: 41rem;
-          }
-        `
-      : css`
-          &:hover {
-            color: white;
-          }
-        `}
+      @media only screen and (max-width: 768px) {
+        font-size: 41rem;
+      }
+    `}
 `;
 
 export default function Title({ title }) {
