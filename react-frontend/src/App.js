@@ -23,7 +23,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
-const FPS = 30;
+const FPS = 20;
 const ZOOM_STRENGTH = 0.5;
 
 export const insideInterval = (coordinate) =>
@@ -63,13 +63,13 @@ function App() {
       color,
       coordinates: [x, y],
       owner,
-      paintCount,
+      count,
     } = pixel;
 
     return {
       color,
       owner,
-      paintCount: Number(paintCount),
+      count: Number(count),
       x: Number(x),
       y: Number(y),
       id: `${x}-${y}`,
@@ -146,15 +146,15 @@ function App() {
     ctx.clearRect(0, 0, map.width, map.height);
 
     pixelsToLoad.forEach((pixel) => {
-      if (pixel.paintCount === "0") return;
+      if (pixel.count === "0") return;
 
-      const { id, x, y, color, paintCount, owner } = parsePixel(pixel);
+      const { id, x, y, color, count, owner } = parsePixel(pixel);
 
       nextChainPixels[id] = {
         color,
         x,
         y,
-        paintCount,
+        count,
         owner,
       };
 
@@ -255,8 +255,8 @@ function App() {
       chainPixelsToUpdate.current = {};
 
       if (pixelToAlert.current) {
-        const { paintCount, x, y, owner, color } = pixelToAlert.current;
-        const price = window.web3.utils.fromWei(`${getPixelPrice(paintCount)}`);
+        const { count, x, y, owner, color } = pixelToAlert.current;
+        const price = window.web3.utils.fromWei(`${getPixelPrice(count)}`);
 
         setAlert({
           severity: "info",

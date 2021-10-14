@@ -102,3 +102,8 @@ button.MuiButtonBase-root.Mui-disabled {
 button.MuiButtonBase-root.MuiButton-text {
   background: black;
 }
+
+.MuiAlert-message {
+  display: flex;
+  flex-direction: column;
+}

@@ -7,6 +7,7 @@ export const AlertWrapper = styled.div`
   top: 1rem;
   left: 1rem;
   max-width: 32rem;
+  max-height: calc(100% - 2rem);
   display: flex;
   justify-content: center;
   text-transform: initial;

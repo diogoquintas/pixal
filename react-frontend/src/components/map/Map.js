@@ -86,11 +86,11 @@ const MouseController = ({
     <InfoWrapper>
       {chainInfo && (
         <>
-          <p>{`painted ${chainInfo.paintCount} time${
-            chainInfo.paintCount === 1 ? "" : "s"
+          <p>{`painted ${chainInfo.count} time${
+            chainInfo.count === 1 ? "" : "s"
           }`}</p>
           <p>{`price=${window.web3.utils.fromWei(
-            `${getPixelPrice(chainInfo.paintCount ?? 0)}`
+            `${getPixelPrice(chainInfo.count)}`
           )} ETH`}</p>
           <p>{`painter=${chainInfo.owner}`}</p>
         </>
@@ -190,7 +190,7 @@ const Map = forwardRef(
               width: calc(100% - 2rem);
               padding-top: 50%;
               transform: translateX(${mapOpen ? 0 : "-150%"});
-              transition: linear transform 300ms;
+              transition: ease transform 150ms;
             `
           }
           position={position}

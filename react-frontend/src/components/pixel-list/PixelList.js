@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { REFERENCE_PRICE } from "../../App";
 import Minus from "../icons/Minus";
 import Plus from "../icons/Plus";
@@ -19,8 +19,10 @@ const MAX_PIXELS_PER_TRANSACTION = Number(
   process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
 );
 
-export function getPixelPrice(count) {
-  if (count === 0) return 0;
+export function getPixelPrice(countCanBeString) {
+  const count = Number(countCanBeString);
+
+  if (count === 0 || isNaN(count)) return 0;
 
   return REFERENCE_PRICE * Math.pow(10, Math.min(11, count));
 }
@@ -79,6 +81,9 @@ export default function PixelList({
   const [open, setOpen] = useState(false);
   const [deleteQueue, setDeleteQueue] = useState([]);
   const [total, setTotal] = useState(0);
+  const [listHeight, setListHeight] = useState(500);
+
+  const listRef = useRef();
 
   const pixelsAsList = useMemo(
     () => {
@@ -88,8 +93,8 @@ export default function PixelList({
         const [x, y] = id.split("-");
 
         const onChain = stateChainPixels[id];
-        const paintCount = onChain?.paintCount ?? 0;
-        const price = getPixelPrice(paintCount);
+        const count = onChain?.count ?? 0;
+        const price = getPixelPrice(count);
 
         listTotal = listTotal + price;
 
@@ -100,7 +105,7 @@ export default function PixelList({
           color: pixels[id],
           owner: onChain?.owner,
           price,
-          paintCount,
+          count,
         };
       });
 
@@ -120,6 +125,26 @@ export default function PixelList({
     pixelsAsList.forEach(({ x, y }) => revertPixel({ x, y }));
     setOpen(false);
   };
+
+  useEffect(() => {
+    if (pixelsAsList?.length === 0) return;
+
+    function setHeight() {
+      if (!listRef.current) return;
+
+      const rect = listRef.current.getBoundingClientRect();
+
+      setListHeight(rect.height - 50);
+    }
+
+    window.addEventListener("resize", setHeight);
+
+    setHeight();
+
+    return () => {
+      window.removeEventListener("resize", setHeight);
+    };
+  }, [pixelsAsList]);
 
   if (pixelsAsList?.length === 0) return null;
 
@@ -145,10 +170,10 @@ export default function PixelList({
           setAlert={setAlert}
         />
       </ControlsWrapper>
-      <ListWrapper open={open}>
+      <ListWrapper ref={listRef} open={open}>
         <StyledList
           width={400}
-          height={500}
+          height={listHeight}
           rowCount={pixelsAsList.length}
           rowHeight={45}
           rowRenderer={({ key, index, style }) => {

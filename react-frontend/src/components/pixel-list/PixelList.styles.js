@@ -46,7 +46,7 @@ export const StyledList = styled(List)`
 
 export const Item = styled.div`
   display: flex;
-  transition: position 300ms ease;
+  transition: position 150ms ease;
 
   & > div {
     margin: auto 0;
@@ -64,7 +64,7 @@ export const Item = styled.div`
   ${({ inDeleteQueue }) =>
     inDeleteQueue
       ? css`
-          animation: ${disapear} 300ms ease forwards;
+          animation: ${disapear} 150ms ease forwards;
         `
       : css`
           &:hover {
@@ -77,11 +77,14 @@ export const ListWrapper = styled.div`
   position: fixed;
   left: 1rem;
   bottom: 4rem;
-  transform: translateY(${({ open }) => (open ? "0" : "calc(100% + 5rem)")});
+  transform: translateX(${({ open }) => (open ? "0" : "calc(-100% - 5rem)")});
   transition: transform 150ms ease;
-  margin-bottom: 0.5rem;
   background: black;
   border: 0.1rem solid white;
+  z-index: 100;
+  box-sizing: border-box;
+  height: calc(100% - 5rem);
+  overflow: hidden;
 `;
 
 export const Color = styled.div`

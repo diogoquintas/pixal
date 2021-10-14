@@ -35,7 +35,7 @@ const H1 = styled.h1`
   font-family: "Perfect DOS VGA";
   margin: 0;
   cursor: url("play.png"), pointer;
-  transition: ease-in font-size 300ms;
+  transition: ease-in font-size 150ms;
 
   @media only screen and (max-width: 768px) {
     font-size: 7rem;
@@ -45,7 +45,7 @@ const H1 = styled.h1`
     animate &&
     css`
       font-size: 62rem;
-      animation: ${marquiesh} 82s linear 10ms forwards;
+      animation: ${marquiesh} 82s ease 10ms forwards;
       cursor: url("stop.png"), pointer;
 
       @media only screen and (max-width: 768px) {
