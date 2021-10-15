@@ -19,28 +19,18 @@ export default function Help() {
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <DialogTitle>WHAT IS THIS?</DialogTitle>
+          <DialogTitle>gm</DialogTitle>
           <DialogContentText>
-            This application interacts with an open and permissionless canvas,
-            distribuited and stored in the{" "}
+            You have a canvas with 1000x1000 pixels wide. Every pixel can be
+            painted on a different color, you can paint them all or you can
+            paint none, that's up to you.
+          </DialogContentText>
+          <DialogContentText>
+            The canvas lives in the{" "}
             <a href="https://ethereum.org/" target="_blank" rel="noreferrer">
               Ethereum blockchain
-            </a>
-            .
-          </DialogContentText>
-          <DialogContentText>
-            Each pixel can be painted on any color you like, for whatever reason
-            you find.
-          </DialogContentText>
-          <DialogContentText>
-            The canvas is a square with one thousand pixels wide.
-          </DialogContentText>
-          <DialogContentText>
-            There's no clear goal to this, it was made for fun, interact with it
-            at your own risk.
-          </DialogContentText>
-          <DialogContentText>
-            <span>The blockchain logic is stored in </span>
+            </a>{" "}
+            , more precisely in{" "}
             <a
               href={`${process.env.REACT_APP_CONTRACT_EXPLORER}${process.env.REACT_APP_CONTRACT_ADDRESS}`}
               target="_blank"
@@ -48,15 +38,26 @@ export default function Help() {
             >
               this contract
             </a>
-            <span>.</span>
-            <span>
-              {" "}
-              Before any interaction, make sure you read the code. This contract
-              was not audited and could lead to exploits.
-            </span>
+            .
           </DialogContentText>
-
-          <DialogTitle>PIXELNOMICS</DialogTitle>
+          <DialogContentText>
+            If you wish to interact, make sure you read the code. This contract
+            was not audited.
+          </DialogContentText>
+          <DialogContentText>
+            We use Arbitrum as a solution to the high gas fees in layer one. If
+            you never interacted with it, follow this{" "}
+            <a
+              href="https://arbitrum.io/bridge-tutorial/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Arbitrum bridge tutorial
+            </a>{" "}
+            to connect.
+          </DialogContentText>
+          <DialogTitle>wagmi?</DialogTitle>
+          <DialogContentText>yes, wagmi.</DialogContentText>
           <DialogContentText>
             The price of each pixel starts at 0 ETH and it increases
             exponentially each time it is painted.
@@ -77,6 +78,8 @@ export default function Help() {
             it exists) will receive three quarters of the amount payed to
             re-paint the pixel.
           </DialogContentText>
+
+          <DialogTitle>the canvas is yours</DialogTitle>
 
           <DialogTitle>links</DialogTitle>
           <DialogContentText>

@@ -32,7 +32,7 @@ export const insideInterval = (coordinate) =>
 function App() {
   const [pixelsLoaded, setPixelsLoaded] = useState(false);
   const [transacting, setTransacting] = useState(false);
-  const [mode, setMode] = useState(MODE.paint);
+  const [mode, setMode] = useState(MODE.move);
   const [alert, initialSetAlert] = useState();
   const [canvasReady, setCanvasReady] = useState(false);
   const [localPixels, setLocalPixels] = useState({});
@@ -51,12 +51,13 @@ function App() {
   const color = useRef(SECONDARY_COLOR);
   const size = useRef(MIN_SIZE);
   const chainPixels = useRef({});
-  const currentMode = useRef(MODE.paint);
+  const currentMode = useRef(MODE.move);
   const markerRef = useRef();
   const alertTimeout = useRef();
   const chainPixelsToUpdate = useRef({});
   const pixelToAlert = useRef();
   const timeSinceLastDraw = useRef(0);
+  const selectedCoordinates = useRef();
 
   const parsePixel = (pixel) => {
     const {
@@ -129,12 +130,37 @@ function App() {
         size.current * zoom
       );
     } else if (currentMode.current === MODE.delete) {
-      ctx.strokeStyle = SECONDARY_COLOR;
+      ctx.strokeStyle = "white";
       ctx.strokeRect(
         (x - Math.floor(size.current / 2) - xMin) * zoom,
         (y - Math.floor(size.current / 2) - yMin) * zoom,
         size.current * zoom,
         size.current * zoom
+      );
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(
+        (x - Math.floor(size.current / 2) - xMin) * zoom + 1,
+        (y - Math.floor(size.current / 2) - yMin) * zoom + 1,
+        size.current * zoom - 2,
+        size.current * zoom - 2
+      );
+    } else if (currentMode.current === MODE.move) {
+      const targetX = selectedCoordinates.current?.x ?? x;
+      const targetY = selectedCoordinates.current?.y ?? y;
+
+      ctx.strokeStyle = "white";
+      ctx.strokeRect(
+        (targetX - xMin) * zoom,
+        (targetY - yMin) * zoom,
+        zoom,
+        zoom
+      );
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(
+        (targetX - xMin) * zoom + 1,
+        (targetY - yMin) * zoom + 1,
+        zoom - 2,
+        zoom - 2
       );
     }
   };
@@ -535,6 +561,9 @@ function App() {
         chainPixels={chainPixels}
         markerRef={markerRef}
         updatePosition={updatePosition}
+        selectedCoordinates={selectedCoordinates}
+        canvasRef={canvasRef}
+        currentMode={currentMode}
       />
     </>
   );

@@ -83,11 +83,11 @@ export default function Connect({
           <>
             &gt;_There was an error reading the blockchain data, make sure
             you're connected to the correct network. We currently use Arbitrum
-            for faster and cheaper connections, follow this link to{" "}
+            for lower gas fees, follow this link to{" "}
             <a
               target="_blank"
               rel="noreferrer"
-              href="https://developer.offchainlabs.com/docs/public_testnet#connecting-to-the-chain"
+              href="https://arbitrum.io/bridge-tutorial/"
             >
               connect to the chain
             </a>

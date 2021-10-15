@@ -12,9 +12,11 @@ import {
   MapButton,
   InfoWrapper,
   CoordinatesWrapper,
+  CloseButton,
 } from "./Map.styles";
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
+import { MODE } from "../../App";
 // import namehash from "eth-ens-namehash";
 
 // async function reverseName(address) {
@@ -30,9 +32,15 @@ const MouseController = ({
   getPixelCoordinates,
   chainPixels,
   ready,
+  selectedCoordinates,
+  canvasRef,
+  currentMode,
 }) => {
-  const [coordinates, setCoordinates] = useState();
+  const [mouseCoordinates, setMouseCoordinates] = useState();
   // const [names, setNames] = useState({});
+  const [selected, setSelected] = useState();
+
+  const coordinates = selected ?? mouseCoordinates;
 
   useEffect(() => {
     function handleMouseMove(event) {
@@ -43,7 +51,7 @@ const MouseController = ({
 
       if (isNaN(nextCoordinates.x) || isNaN(nextCoordinates.y)) return;
 
-      setCoordinates(nextCoordinates);
+      setMouseCoordinates(nextCoordinates);
     }
 
     document.addEventListener("mousemove", handleMouseMove);
@@ -53,6 +61,34 @@ const MouseController = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!ready || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+
+    function selectPixel() {
+      if (currentMode.current !== MODE.move) return;
+
+      const nextCoordinates = getPixelCoordinates();
+
+      if (isNaN(nextCoordinates.x) || isNaN(nextCoordinates.y)) return;
+
+      setSelected(nextCoordinates);
+    }
+
+    canvas.addEventListener("click", selectPixel);
+
+    return () => {
+      canvas.removeEventListener("click", selectPixel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready]);
+
+  useEffect(() => {
+    selectedCoordinates.current = selected;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected]);
 
   // useEffect(() => {
   //   if (!coordinates) return;
@@ -103,6 +139,9 @@ const MouseController = ({
           <span>{`<${x}, ${y}>`}</span>
         </Coordinates>
       </CoordinatesWrapper>
+      {selected && (
+        <CloseButton onClick={() => setSelected(undefined)}>[X]</CloseButton>
+      )}
     </InfoWrapper>
   );
 };
@@ -161,6 +200,9 @@ const Map = forwardRef(
       chainPixels,
       markerRef,
       updatePosition,
+      selectedCoordinates,
+      canvasRef,
+      currentMode,
     },
     ref
   ) => {
@@ -175,6 +217,9 @@ const Map = forwardRef(
           position={position}
           getPixelCoordinates={getPixelCoordinates}
           chainPixels={chainPixels}
+          selectedCoordinates={selectedCoordinates}
+          canvasRef={canvasRef}
+          currentMode={currentMode}
         />
         {isMobile && ready && (
           <MapButton variant="outlined" onClick={() => setMapOpen(!mapOpen)}>

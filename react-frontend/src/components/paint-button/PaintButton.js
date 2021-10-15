@@ -24,7 +24,7 @@ export default function PaintButton({
           setTransacting(false);
 
           setAlert({
-            msg: ">_done, congratulations! your pixels are now saved in the blockchain.",
+            msg: ">_congratulations! your pixels are now saved in the blockchain.",
             severity: "success",
             dismissibleTime: 3000,
           });

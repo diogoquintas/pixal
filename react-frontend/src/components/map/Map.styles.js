@@ -106,3 +106,15 @@ export const MapButton = styled(Button)`
     height: 1.5rem;
   }
 `;
+
+export const CloseButton = styled.button`
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: none;
+  color: white;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  cursor: pointer;
+`;
