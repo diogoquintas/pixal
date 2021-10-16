@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { storageGetPixels, storageUpdatePixels } from "./logic/storage/pixels";
 import Canvas from "./components/canvas/Canvas";
 import Loading from "./components/loading/Loading";
-import { AlertWrapper } from "./App.styles";
+import { AlertWrapper, Message } from "./App.styles";
 import Alert from "@mui/material/Alert";
 import Title from "./components/title/Title";
 import useTimeout from "./logic/useTimeout";
@@ -12,6 +12,9 @@ import PixelList, { getPixelPrice } from "./components/pixel-list/PixelList";
 import Map from "./components/map/Map";
 import { MIN_SIZE } from "./components/size-picker/SizePicker";
 import { AlertTitle } from "@mui/material";
+import getIsValidColor from "./logic/isValidColor";
+import getIsMobileDevice from "./logic/isMobileDevice";
+import getName from "./logic/blockchain/getName";
 
 export const BOARD_SIZE = 1000;
 export const MODE = {
@@ -23,7 +26,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
-const FPS = 20;
+const FPS = 35;
 const ZOOM_STRENGTH = 0.5;
 
 export const insideInterval = (coordinate) =>
@@ -38,6 +41,7 @@ function App() {
   const [localPixels, setLocalPixels] = useState({});
   const [pixelsToLoad, setPixelsToLoad] = useState();
   const [stateChainPixels, setStateChainPixels] = useState({});
+  const [isMobileDevice] = useState(getIsMobileDevice);
 
   const map = useRef(document.createElement("canvas"));
   const mapCtx = useRef(map.current.getContext("2d"));
@@ -58,6 +62,35 @@ function App() {
   const pixelToAlert = useRef();
   const timeSinceLastDraw = useRef(0);
   const selectedCoordinates = useRef();
+  const names = useRef({});
+
+  const findName = async (address) => {
+    names.current[address] = {
+      ...names.current,
+      [address]: {
+        state: "loading",
+      },
+    };
+
+    try {
+      const name = await getName(address);
+
+      names.current[address] = {
+        ...names.current,
+        [address]: {
+          status: "success",
+          name,
+        },
+      };
+    } catch {
+      names.current[address] = {
+        ...names.current,
+        [address]: {
+          state: "failed",
+        },
+      };
+    }
+  };
 
   const parsePixel = (pixel) => {
     const {
@@ -67,8 +100,16 @@ function App() {
       count,
     } = pixel;
 
+    const isValidColor = getIsValidColor(color);
+    const name = names.current[owner];
+
+    if (!name) {
+      findName(owner);
+    }
+
     return {
-      color,
+      color: isValidColor ? color : "#000000",
+      message: isValidColor ? undefined : color.slice(0, 280),
       owner,
       count: Number(count),
       x: Number(x),
@@ -113,6 +154,24 @@ function App() {
     }
 
     const { x, y } = getPixelCoordinates();
+
+    if (isMobileDevice) {
+      if (selectedCoordinates.current) {
+        const { x, y } = selectedCoordinates.current;
+
+        ctx.strokeStyle = "white";
+        ctx.strokeRect((x - xMin) * zoom, (y - yMin) * zoom, zoom, zoom);
+        ctx.strokeStyle = "black";
+        ctx.strokeRect(
+          (x - xMin) * zoom + 1,
+          (y - yMin) * zoom + 1,
+          zoom - 2,
+          zoom - 2
+        );
+      }
+
+      return;
+    }
 
     if (currentMode.current === MODE.paint) {
       ctx.fillStyle = color.current;
@@ -174,15 +233,10 @@ function App() {
     pixelsToLoad.forEach((pixel) => {
       if (pixel.count === "0") return;
 
-      const { id, x, y, color, count, owner } = parsePixel(pixel);
+      const pixelInfo = parsePixel(pixel);
+      const { id, x, y, color } = pixelInfo;
 
-      nextChainPixels[id] = {
-        color,
-        x,
-        y,
-        count,
-        owner,
-      };
+      nextChainPixels[id] = pixelInfo;
 
       ctx.fillStyle = color;
       ctx.fillRect(x, y, 1, 1);
@@ -281,16 +335,20 @@ function App() {
       chainPixelsToUpdate.current = {};
 
       if (pixelToAlert.current) {
-        const { count, x, y, owner, color } = pixelToAlert.current;
+        const { count, x, y, owner, color, message } = pixelToAlert.current;
         const price = window.web3.utils.fromWei(`${getPixelPrice(count)}`);
+        const name = names.current[owner]?.name ?? owner;
 
         setAlert({
           severity: "info",
-          dismissibleTime: 5000,
+          dismissibleTime: message ? 10000 : 5000,
           title: (
             <>
-              <p>{`>_${owner} just painted <${x}, ${y}> in ${color}.`}</p>
-              <p>{`current pixel price is ${price} ETH`}</p>
+              <p>{`>_${name} painted at <${x}, ${y}> ${
+                message ? "👀" : `in the color ${color} 🎨`
+              }`}</p>
+              {message && <Message>{`"${message}"`}</Message>}
+              <p>{`Current pixel price is ${price} ETH`}</p>
             </>
           ),
         });
@@ -550,6 +608,7 @@ function App() {
             setAlert={setAlert}
             setPixelsToLoad={setPixelsToLoad}
             updateChainPixel={updateChainPixel}
+            isMobileDevice={isMobileDevice}
           />
         </>
       )}
@@ -564,6 +623,9 @@ function App() {
         selectedCoordinates={selectedCoordinates}
         canvasRef={canvasRef}
         currentMode={currentMode}
+        mode={mode}
+        isMobileDevice={isMobileDevice}
+        names={names}
       />
     </>
   );

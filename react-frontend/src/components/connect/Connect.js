@@ -13,26 +13,34 @@ import { ErrorPre } from "../../App.styles";
 import Help from "../help/Help";
 import { ConnectButton } from "./Connect.styles";
 
-function isMobileDevice() {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent
-  );
-}
-
 export default function Connect({
   setAlert,
   setPixelsToLoad,
   updateChainPixel,
+  isMobileDevice,
 }) {
   const [connecting, setConnecting] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
+
+  const setErrorAlert = ({ err, title }) => {
+    setAlert({
+      msg: (
+        <>
+          <p>detailed info:</p>
+          <ErrorPre>{err.message}</ErrorPre>
+        </>
+      ),
+      title,
+      severity: "error",
+    });
+  };
 
   const connect = async () => {
     setAlert(undefined);
     setConnecting(true);
 
     try {
-      if (isMobileDevice()) {
+      if (isMobileDevice) {
         window.location.replace(
           `metamask://${process.env.REACT_APP_METAMASK_DEEP_LINK}`
         );
@@ -60,15 +68,14 @@ export default function Connect({
     try {
       await loadAccount();
     } catch (err) {
-      setAlert({
-        msg: <ErrorPre>{err.message}</ErrorPre>,
+      setErrorAlert({
+        err,
         title: (
           <>
             &gt;_There was an error connecting to your account, make sure you
             have an account selected
           </>
         ),
-        severity: "error",
       });
       setConnecting(false);
       return;
@@ -77,8 +84,17 @@ export default function Connect({
     try {
       await loadContract();
     } catch (err) {
-      setAlert({
-        msg: <ErrorPre>{err.message}</ErrorPre>,
+      setConnecting(false);
+      return;
+    }
+
+    try {
+      const pixels = await getPixels();
+
+      setPixelsToLoad(pixels ?? []);
+    } catch (err) {
+      setErrorAlert({
+        err,
         title: (
           <>
             &gt;_There was an error reading the blockchain data, make sure
@@ -94,35 +110,6 @@ export default function Connect({
             .
           </>
         ),
-        severity: "error",
-      });
-      setConnecting(false);
-      return;
-    }
-
-    try {
-      const pixels = await getPixels();
-
-      setPixelsToLoad(pixels ?? []);
-    } catch (err) {
-      setAlert({
-        msg: <ErrorPre>{err.message}</ErrorPre>,
-        title: (
-          <>
-            &gt;_There was an error fetching the pixels, make sure you're
-            connected to the correct network. We currently use Arbitrum for
-            faster and cheaper connections, follow this link to{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href="https://developer.offchainlabs.com/docs/public_testnet#connecting-to-the-chain"
-            >
-              connect to the chain
-            </a>
-            .
-          </>
-        ),
-        severity: "error",
       });
       setConnecting(false);
       return;

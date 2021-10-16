@@ -2,13 +2,13 @@ const MAX_PIXELS_PER_TRANSACTION = Number(
   process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
 );
 
-export default function paint(initialPixels) {
-  const pixels = initialPixels.map(({ x, y, color }) => [color, [x, y]]);
+export default function paint({ pixelList, setAlert }) {
+  const pixels = pixelList.map(({ x, y, color }) => [color, [x, y]]);
 
   let currentBatch = 0;
 
   const batches = pixels.reduce((acc, pixel, index) => {
-    const price = Number(initialPixels[index].price);
+    const price = Number(pixelList[index].price);
 
     if (acc[currentBatch]) {
       acc[currentBatch].value = acc[currentBatch].value + price;
@@ -26,6 +26,18 @@ export default function paint(initialPixels) {
 
     return acc;
   }, []);
+
+  setAlert({
+    severity: "info",
+    dismissibleTime: 6000,
+    title: (
+      <>
+        <p>{`>_Found ${batches.length} transaction${
+          batches.length > 1 ? "s" : ""
+        } and they are ready to be sent to the blockchain. Complete the next step in your wallet.`}</p>
+      </>
+    ),
+  });
 
   return Promise.all(
     batches.map((batch) =>

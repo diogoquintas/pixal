@@ -65,8 +65,8 @@ export const buildTouchMove =
       );
 
       if (prevDistanceBetweenTouches !== 0) {
-        position.mouseX = (touch2Point.x + touch1Point.x) / 2;
-        position.mouseY = (touch2Point.y + touch1Point.y) / 2;
+        position.current.mouseX = (touch2Point.x + touch1Point.x) / 2;
+        position.current.mouseY = (touch2Point.y + touch1Point.y) / 2;
 
         updateZoom(prevDistanceBetweenTouches - distanceBetweenTouches);
       }

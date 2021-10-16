@@ -15,10 +15,6 @@ import {
   Value,
 } from "./PixelList.styles";
 
-const MAX_PIXELS_PER_TRANSACTION = Number(
-  process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
-);
-
 export function getPixelPrice(countCanBeString) {
   const count = Number(countCanBeString);
 
@@ -26,6 +22,10 @@ export function getPixelPrice(countCanBeString) {
 
   return REFERENCE_PRICE * Math.pow(10, Math.min(11, count));
 }
+
+const MAX_PIXELS_PER_TRANSACTION = Number(
+  process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
+);
 
 const PixelItem = ({
   setDeleteQueue,
@@ -59,10 +59,10 @@ const PixelItem = ({
       }}
     >
       <div>
+        <span>{`<${x}, ${y}>`}</span>
         <Color color={color}>
           <span>{`[${color}]`}</span>
         </Color>
-        <span>{`<${x}, ${y}>`}</span>
         <Value title={`${priceInEth} ETH`}>{`${priceInEth} ETH`}</Value>
         <Delete onClick={() => setToDelete({ x, y, id })}>[x]</Delete>
       </div>
@@ -83,9 +83,11 @@ export default function PixelList({
   const [total, setTotal] = useState(0);
   const [listHeight, setListHeight] = useState(500);
 
+  const currentListId = useRef();
+
   const listRef = useRef();
 
-  const pixelsAsList = useMemo(
+  const pixelList = useMemo(
     () => {
       let listTotal = 0;
 
@@ -110,6 +112,7 @@ export default function PixelList({
       });
 
       setTotal(listTotal);
+      currentListId.current = Date.now();
 
       return list;
     },
@@ -122,12 +125,12 @@ export default function PixelList({
   };
 
   const deleteAll = () => {
-    pixelsAsList.forEach(({ x, y }) => revertPixel({ x, y }));
+    pixelList.forEach(({ x, y }) => revertPixel({ x, y }));
     setOpen(false);
   };
 
   useEffect(() => {
-    if (pixelsAsList?.length === 0) return;
+    if (pixelList?.length === 0) return;
 
     function setHeight() {
       if (!listRef.current) return;
@@ -144,9 +147,9 @@ export default function PixelList({
     return () => {
       window.removeEventListener("resize", setHeight);
     };
-  }, [pixelsAsList]);
+  }, [pixelList]);
 
-  if (pixelsAsList?.length === 0) return null;
+  if (pixelList?.length === 0) return null;
 
   return (
     <>
@@ -157,27 +160,27 @@ export default function PixelList({
           title={`${open ? "Close" : "Open"} pixels settings`}
           onClick={() => setOpen(!open)}
         >
-          <span>{pixelsAsList.length}</span>
+          <span>{pixelList.length}</span>
           {open ? <Minus /> : <Plus />}
         </Control>
         <Control variant="text" onClick={deleteAll}>
           Clear all
         </Control>
         <PaintButton
+          pixelList={pixelList}
           transacting={transacting}
           setTransacting={setTransacting}
-          pixels={pixelsAsList}
           setAlert={setAlert}
         />
       </ControlsWrapper>
       <ListWrapper ref={listRef} open={open}>
         <StyledList
-          width={400}
+          width={345}
           height={listHeight}
-          rowCount={pixelsAsList.length}
+          rowCount={pixelList.length}
           rowHeight={45}
           rowRenderer={({ key, index, style }) => {
-            const pixel = pixelsAsList[index];
+            const pixel = pixelList[index];
 
             return (
               <PixelItem
@@ -197,7 +200,7 @@ export default function PixelList({
         <Info>
           <span>{`total=${window.web3.utils.fromWei(`${total}`)} ETH`}</span>
           <span>{`transactions=${Math.ceil(
-            pixelsAsList.length / MAX_PIXELS_PER_TRANSACTION
+            pixelList.length / MAX_PIXELS_PER_TRANSACTION
           )}`}</span>
         </Info>
       </ListWrapper>

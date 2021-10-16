@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useState, useRef } from "react";
 import { BOARD_SIZE, insideInterval } from "../../App";
 import useViewport from "../../logic/useViewport";
 import { mobile } from "../../styles/media";
@@ -17,15 +17,7 @@ import {
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
 import { MODE } from "../../App";
-// import namehash from "eth-ens-namehash";
-
-// async function reverseName(address) {
-//   const lookup = address.toLowerCase().substr(2) + ".addr.reverse";
-//   const ResolverContract = await window.web3.eth.ens.resolver(lookup);
-//   const nh = namehash.hash(lookup);
-
-//   return ResolverContract.methods.name(nh).call();
-// }
+import { Message } from "../../App.styles";
 
 const MouseController = ({
   position,
@@ -35,15 +27,18 @@ const MouseController = ({
   selectedCoordinates,
   canvasRef,
   currentMode,
+  mode,
+  isMobileDevice,
+  names,
 }) => {
   const [mouseCoordinates, setMouseCoordinates] = useState();
-  // const [names, setNames] = useState({});
   const [selected, setSelected] = useState();
-
-  const coordinates = selected ?? mouseCoordinates;
+  const coordinates = isMobileDevice ? selected : selected ?? mouseCoordinates;
 
   useEffect(() => {
     function handleMouseMove(event) {
+      if (isMobileDevice) return;
+
       position.current.mouseX = event.clientX;
       position.current.mouseY = event.clientY;
 
@@ -90,28 +85,12 @@ const MouseController = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
-  // useEffect(() => {
-  //   if (!coordinates) return;
-
-  //   const address =
-  //     chainPixels.current?.[`${coordinates.x}-${coordinates.y}`]?.owner;
-
-  //   if (!address) return;
-  //   if (names[address]) return;
-
-  //   async function getName() {
-  //     try {
-  //       const name = await reverseName(address);
-
-  //       setNames((names) => ({ ...names, [address]: name }));
-  //     } catch (err) {
-  //       setNames((names) => ({ ...names, [address]: address }));
-  //     }
-  //   }
-
-  //   getName();
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [coordinates]);
+  useEffect(() => {
+    if (mode !== MODE.move) {
+      setSelected(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   if (!coordinates || !ready) return null;
 
@@ -120,6 +99,9 @@ const MouseController = ({
 
   return (
     <InfoWrapper>
+      {selected && (
+        <CloseButton onClick={() => setSelected(undefined)}>[X]</CloseButton>
+      )}
       {chainInfo && (
         <>
           <p>{`painted ${chainInfo.count} time${
@@ -128,9 +110,12 @@ const MouseController = ({
           <p>{`price=${window.web3.utils.fromWei(
             `${getPixelPrice(chainInfo.count)}`
           )} ETH`}</p>
-          <p>{`painter=${chainInfo.owner}`}</p>
+          <p>{`painter=${
+            names.current[chainInfo.owner]?.name ?? chainInfo.owner
+          }`}</p>
         </>
       )}
+      {chainInfo?.message && <Message>{`"${chainInfo.message}"`}</Message>}
       <CoordinatesWrapper>
         <Coordinates
           color={chainInfo?.color}
@@ -139,9 +124,6 @@ const MouseController = ({
           <span>{`<${x}, ${y}>`}</span>
         </Coordinates>
       </CoordinatesWrapper>
-      {selected && (
-        <CloseButton onClick={() => setSelected(undefined)}>[X]</CloseButton>
-      )}
     </InfoWrapper>
   );
 };
@@ -203,6 +185,9 @@ const Map = forwardRef(
       selectedCoordinates,
       canvasRef,
       currentMode,
+      mode,
+      isMobileDevice,
+      names,
     },
     ref
   ) => {
@@ -220,6 +205,9 @@ const Map = forwardRef(
           selectedCoordinates={selectedCoordinates}
           canvasRef={canvasRef}
           currentMode={currentMode}
+          mode={mode}
+          isMobileDevice={isMobileDevice}
+          names={names}
         />
         {isMobile && ready && (
           <MapButton variant="outlined" onClick={() => setMapOpen(!mapOpen)}>

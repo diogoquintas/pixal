@@ -55,7 +55,7 @@ export const Item = styled.div`
     align-items: center;
 
     & > span {
-      width: 7rem;
+      width: 5.9rem;
       margin-left: 0.5rem;
       flex-shrink: 0;
     }
@@ -91,7 +91,7 @@ export const Color = styled.div`
   background-color: ${({ color }) => color};
   text-align: center;
   height: 1.5rem;
-  width: 7rem;
+  width: 5.4rem;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -126,7 +126,7 @@ export const Info = styled.div`
 `;
 
 export const Value = styled.span`
-  width: 7rem !important;
+  width: 6.2rem !important;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
