@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { forwardRef, useEffect, useState, useRef } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { BOARD_SIZE, insideInterval } from "../../App";
 import useViewport from "../../logic/useViewport";
 import { mobile } from "../../styles/media";
