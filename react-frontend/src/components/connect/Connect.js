@@ -11,15 +11,15 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ErrorPre } from "../../App.styles";
 import Help from "../help/Help";
-import { ConnectButton } from "./Connect.styles";
+import { ConnectButton, ViewButton } from "./Connect.styles";
 
 export default function Connect({
   setAlert,
   setPixelsToLoad,
   updateChainPixel,
-  isMobileDevice,
 }) {
   const [connecting, setConnecting] = useState(false);
+  const [connectingAsViewer, setConnectingAsViewer] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
 
   const setErrorAlert = ({ err, title }) => {
@@ -40,25 +40,38 @@ export default function Connect({
     setConnecting(true);
 
     try {
-      if (isMobileDevice) {
-        window.location.replace(
-          `metamask://${process.env.REACT_APP_METAMASK_DEEP_LINK}`
-        );
+      const provider = window.ethereum;
 
-        window.setTimeout(() => {
-          setShowWalletModal(false);
-          setConnecting(false);
-        }, 3000);
+      if (!window.ethereum) {
+        throw new Error("no ethereum injected");
+      } else {
+        await provider.enable();
       }
 
-      if (!window.ethereum) throw new Error("no provider injected");
-
-      await window.ethereum.enable();
-      window.web3 = new Web3(window.ethereum);
+      window.web3 = new Web3(provider);
       loadChainInfo();
     } catch {
       setShowWalletModal(true);
       setConnecting(false);
+
+      return;
+    }
+  };
+
+  const connectAsViewer = async () => {
+    setAlert(undefined);
+    setConnectingAsViewer(true);
+
+    try {
+      const provider = new Web3.providers.HttpProvider(
+        process.env.REACT_APP_INFURA_ENDPOINT
+      );
+
+      window.web3 = new Web3(provider);
+      loadChainInfo();
+    } catch {
+      setShowWalletModal(true);
+      setConnectingAsViewer(false);
 
       return;
     }
@@ -78,6 +91,7 @@ export default function Connect({
         ),
       });
       setConnecting(false);
+      setConnectingAsViewer(false);
       return;
     }
 
@@ -85,6 +99,7 @@ export default function Connect({
       await loadContract();
     } catch (err) {
       setConnecting(false);
+      setConnectingAsViewer(false);
       return;
     }
 
@@ -112,25 +127,35 @@ export default function Connect({
         ),
       });
       setConnecting(false);
+      setConnectingAsViewer(false);
       return;
     }
 
     window.contract.events.PixelPainted(undefined, updateChainPixel);
 
     setConnecting(false);
+    setConnectingAsViewer(false);
   };
 
   return (
     <>
       <div>
         <ConnectButton
-          color="secondary"
-          variant="contained"
+          color="primary"
+          variant="outlined"
           loading={connecting}
           onClick={connect}
         >
           Connect
         </ConnectButton>
+        <ViewButton
+          color="primary"
+          variant="contained"
+          loading={connectingAsViewer}
+          onClick={connectAsViewer}
+        >
+          Enter as a viewer
+        </ViewButton>
         <Help />
       </div>
       <Dialog open={showWalletModal}>
@@ -141,8 +166,7 @@ export default function Connect({
             <a target="_blank" rel="noreferrer" href="https://metamask.io/">
               Metamask
             </a>{" "}
-            since it's the wallet we currently support. Other wallets could lead
-            to malfunction.
+            At the moment, we only support view mode for mobile devices.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

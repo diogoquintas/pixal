@@ -17,6 +17,10 @@ export const AlertWrapper = styled.div`
     color: white;
   }
 
+  & p {
+    word-break: break-all;
+  }
+
   ${mobileMediaScreen} {
     width: calc(100% - 2rem);
   }
@@ -37,6 +41,7 @@ export const Message = styled.p`
   font-size: 0.8rem;
   text-transform: initial;
   margin: 1rem 0;
+  word-break: break-all;
 
   ${hideScrollbar}
 `;

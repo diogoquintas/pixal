@@ -403,8 +403,8 @@ function App() {
     updateImageWhenPossible();
   };
 
-  const updateChainPixel = (_, { returnValues }) => {
-    const pixel = returnValues._paintedPixel;
+  const updateChainPixel = (_, update) => {
+    const pixel = update?.returnValues?._paintedPixel;
 
     if (!pixel) return;
 
@@ -608,7 +608,6 @@ function App() {
             setAlert={setAlert}
             setPixelsToLoad={setPixelsToLoad}
             updateChainPixel={updateChainPixel}
-            isMobileDevice={isMobileDevice}
           />
         </>
       )}
