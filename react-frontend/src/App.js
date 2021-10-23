@@ -478,10 +478,6 @@ function App() {
       Math.max(nextPosition.minZoom, nextPosition.zoom - delta * ZOOM_STRENGTH),
       nextPosition.maxZoom
     );
-    nextPosition.xOffscreen =
-      BOARD_SIZE * nextPosition.zoom - window.innerWidth;
-    nextPosition.yOffscreen =
-      BOARD_SIZE * nextPosition.zoom - window.innerHeight;
 
     const mouseAfterZoom = {
       x: nextPosition.mouseX / nextPosition.zoom,

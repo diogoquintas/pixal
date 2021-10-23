@@ -61,7 +61,7 @@ export const MapWrapper = styled.div`
 export const Marker = styled.div`
   position: absolute;
   border: 0.1rem solid var(--secondary-color);
-  pointer-events: none;
+  cursor: grab;
 `;
 
 export const InfoWrapper = styled.div`

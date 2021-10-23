@@ -1,23 +1,35 @@
 import { BOARD_SIZE } from "../../App";
 
+function getRandomNumber(max) {
+  return Math.floor(Math.random() * max);
+}
+
 export default function getCanvasPosition(previousPosition) {
   const zoomX = window.innerWidth / (BOARD_SIZE + 2);
   const zoomY = window.innerHeight / (BOARD_SIZE + 2);
 
   const position = { ...previousPosition };
 
-  position.zoom = Math.max(zoomX, zoomY);
+  const minZoom = Math.max(zoomX, zoomY);
 
-  position.minZoom = position.zoom;
+  position.minZoom = minZoom;
   position.maxZoom = position.zoom + 500;
 
-  position.xOffscreen = BOARD_SIZE * position.zoom - window.innerWidth;
-  position.yOffscreen = BOARD_SIZE * position.zoom - window.innerHeight;
+  position.zoom = minZoom + 5;
 
-  position.offsetX = -(position.xOffscreen / 2);
-  position.offsetY = -(position.yOffscreen / 2);
-  position.xMin = -(position.offsetX / position.zoom);
-  position.yMin = -(position.offsetY / position.zoom);
+  if (
+    previousPosition.xMin === undefined ||
+    previousPosition.yMin === undefined
+  ) {
+    position.offsetX = -getRandomNumber(
+      BOARD_SIZE * position.zoom - window.innerWidth
+    );
+    position.offsetY = -getRandomNumber(
+      BOARD_SIZE * position.zoom - window.innerHeight
+    );
+    position.xMin = -(position.offsetX / position.zoom);
+    position.yMin = -(position.offsetY / position.zoom);
+  }
 
   if (
     previousPosition.mouseX === undefined ||

@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { BOARD_SIZE, insideInterval } from "../../App";
 import useViewport from "../../logic/useViewport";
 import { mobile } from "../../styles/media";
@@ -137,22 +137,31 @@ function MapImage({
   ...remainingProps
 }) {
   const [loaded, setLoaded] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const previousPosition = useRef();
 
   return (
-    <MapWrapper canShow={loaded} {...remainingProps}>
+    <MapWrapper
+      canShow={loaded}
+      onMouseLeave={() => {
+        setIsDragging(false);
+        previousPosition.current = undefined;
+      }}
+      {...remainingProps}
+    >
       <Image
         onLoad={() => setLoaded(true)}
         ref={imageRef}
         alt="Map"
         onClick={(event) => {
-          const rect = event.target.getBoundingClientRect();
+          const rect = imageRef.current.getBoundingClientRect();
 
           const layerX = event.clientX - rect.left;
           const layerY = event.clientY - rect.top;
 
           const x = Math.floor((layerX * BOARD_SIZE) / rect.width);
           const y = Math.floor((layerY * BOARD_SIZE) / rect.height);
-
           const canvasX = x * position.current.zoom;
           const canvasY = y * position.current.zoom;
 
@@ -165,10 +174,58 @@ function MapImage({
           const diffY = canvasY - currentMiddleY;
 
           updatePosition(diffX, diffY);
+
           onClick?.();
+
+          event.stopPropagation();
+          event.preventDefault();
         }}
       />
-      <Marker ref={markerRef} />
+      <Marker
+        ref={markerRef}
+        onMouseDown={(event) => {
+          setIsDragging(true);
+
+          previousPosition.current = {
+            x: event.clientX,
+            y: event.clientY,
+          };
+        }}
+        onMouseMove={(event) => {
+          if (isDragging && previousPosition.current) {
+            const alphaX = event.clientX - previousPosition.current.x;
+            const alphaY = event.clientY - previousPosition.current.y;
+
+            const nextTop = markerRef.current.offsetTop + alphaY;
+            const nextLeft = markerRef.current.offsetLeft + alphaX;
+
+            markerRef.current.style.top = `${nextTop}px`;
+            markerRef.current.style.left = `${nextLeft}px`;
+
+            const rect = imageRef.current.getBoundingClientRect();
+
+            const x = Math.floor((alphaX * BOARD_SIZE) / rect.width);
+            const y = Math.floor((alphaY * BOARD_SIZE) / rect.height);
+            const canvasX = x * position.current.zoom;
+            const canvasY = y * position.current.zoom;
+
+            updatePosition(canvasX, canvasY);
+
+            previousPosition.current = {
+              x: event.clientX,
+              y: event.clientY,
+            };
+          }
+        }}
+        onMouseUp={() => {
+          setIsDragging(false);
+          previousPosition.current = undefined;
+        }}
+        onMouseLeave={() => {
+          setIsDragging(false);
+          previousPosition.current = undefined;
+        }}
+      />
     </MapWrapper>
   );
 }
