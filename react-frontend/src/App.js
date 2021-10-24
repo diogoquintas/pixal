@@ -35,7 +35,7 @@ export const insideInterval = (coordinate) =>
 function App() {
   const [pixelsLoaded, setPixelsLoaded] = useState(false);
   const [transacting, setTransacting] = useState(false);
-  const [mode, setMode] = useState(MODE.move);
+  const [mode, setMode] = useState(MODE.paint);
   const [alert, initialSetAlert] = useState();
   const [canvasReady, setCanvasReady] = useState(false);
   const [localPixels, setLocalPixels] = useState({});
@@ -55,7 +55,7 @@ function App() {
   const color = useRef(SECONDARY_COLOR);
   const size = useRef(MIN_SIZE);
   const chainPixels = useRef({});
-  const currentMode = useRef(MODE.move);
+  const currentMode = useRef(MODE.paint);
   const markerRef = useRef();
   const alertTimeout = useRef();
   const chainPixelsToUpdate = useRef({});

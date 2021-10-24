@@ -2,29 +2,33 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import Cursor from "../icons/Cursor";
+import Eraser from "../icons/Eraser";
+import Pencil from "../icons/Pencil";
+import styled from "@emotion/styled";
+
+const DialogContentTextWithIcons = styled(DialogContentText)`
+  & > svg {
+    width: 1rem;
+    height: 1rem;
+  }
+`;
 
 export default function HelpDialog(props) {
   return (
     <Dialog {...props}>
       <DialogContent>
-        <DialogTitle>stances</DialogTitle>
-        <DialogContentText>
-          There are 3 modes which are represented by the cursor, erasor and
-          pencil icons, they are move, delete and paint, respectably.
-        </DialogContentText>
-        <DialogContentText>
-          In the first mode you can move around with your
-          mouse/trackpad/touchpad or touchscreen and select painted pixels by
-          clicking them.
-        </DialogContentText>
-        <DialogContentText>
-          In the second you can delete the pixels that you painted and haven't
-          been sent to the chain.
-        </DialogContentText>
-        <DialogContentText>
-          In the third you can paint the canvas with the selected color and
-          size.
-        </DialogContentText>
+        <DialogTitle>how</DialogTitle>
+        <DialogContentTextWithIcons>
+          [<Cursor />] - Move around and select pixels for more info.
+        </DialogContentTextWithIcons>
+        <DialogContentTextWithIcons>
+          [<Eraser />] - Delete your local changes, you can select the size of
+          the block.
+        </DialogContentTextWithIcons>
+        <DialogContentTextWithIcons>
+          [<Pencil />] - Paint! You can select the color and size of the block.
+        </DialogContentTextWithIcons>
         <DialogTitle>KEYBOARD CONTROLS</DialogTitle>
         <DialogContentText>[P] - Paint mode</DialogContentText>
         <DialogContentText>[D] - Delete mode</DialogContentText>
@@ -33,12 +37,13 @@ export default function HelpDialog(props) {
         <DialogContentText>[Arrows] - Move the camera</DialogContentText>
         <DialogContentText>[+/-] - Zoom in/out</DialogContentText>
         <DialogContentText>[Space] - Interact</DialogContentText>
-        <DialogTitle>🚀</DialogTitle>
+        <DialogTitle>transactions</DialogTitle>
         <DialogContentText>
-          After your masterpiece is done, you can paint it on chain for everyone
-          to see by sending your transaction(s).
+          {`There is no limit to the pixels an account can paint but there is a
+          limit of ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} pixels
+          for each transaction, everything above ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} requires multiple
+          transactions.`}
         </DialogContentText>
-        <DialogContentText>{`Each transaction can contain ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} pixels.`}</DialogContentText>
       </DialogContent>
     </Dialog>
   );

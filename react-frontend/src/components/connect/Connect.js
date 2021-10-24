@@ -146,7 +146,7 @@ export default function Connect({
           loading={connecting}
           onClick={connect}
         >
-          Connect
+          Enter with your wallet
         </ConnectButton>
         <ViewButton
           color="primary"

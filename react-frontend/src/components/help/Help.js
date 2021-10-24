@@ -19,34 +19,29 @@ export default function Help() {
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <DialogTitle>gm</DialogTitle>
+          <DialogTitle>what is this</DialogTitle>
           <DialogContentText>
-            You have a canvas with 1000x1000 pixels wide. Every pixel can be
-            painted on a different color, you can paint them all or you can
-            paint none, that's up to you.
-          </DialogContentText>
-          <DialogContentText>
-            The canvas lives in the{" "}
+            it is an interface to a contract in the{" "}
             <a href="https://ethereum.org/" target="_blank" rel="noreferrer">
               Ethereum blockchain
-            </a>{" "}
-            , more precisely in{" "}
+            </a>
+            .{" "}
+          </DialogContentText>
+          <DialogContentText>
+            You can and should read{" "}
             <a
               href={`${process.env.REACT_APP_CONTRACT_EXPLORER}${process.env.REACT_APP_CONTRACT_ADDRESS}`}
               target="_blank"
               rel="noreferrer"
             >
-              this contract
-            </a>
-            .
+              the code
+            </a>{" "}
+            before interacting with it. This contract was not audited.
           </DialogContentText>
           <DialogContentText>
-            If you wish to interact, make sure you read the code. This contract
-            was not audited.
-          </DialogContentText>
-          <DialogContentText>
-            We use Arbitrum as a solution to the high gas fees in layer one. If
-            you never interacted with it, follow this{" "}
+            The contract was deployed in Arbitrum. It is a solution to the high
+            gas fees in layer one of Ethereum. If you never interacted with it,
+            follow this{" "}
             <a
               href="https://arbitrum.io/bridge-tutorial/"
               target="_blank"
@@ -56,8 +51,15 @@ export default function Help() {
             </a>{" "}
             to connect.
           </DialogContentText>
-          <DialogTitle>wagmi?</DialogTitle>
-          <DialogContentText>yes, wagmi.</DialogContentText>
+          <DialogTitle>The contract</DialogTitle>
+          <DialogContentText>
+            It saves a color code for each coordinate of a 1000x1000 pixel wide
+            board.
+          </DialogContentText>
+          <DialogContentText>
+            It is open to everyone and there's no limit to the number of pixels
+            you can paint.
+          </DialogContentText>
           <DialogContentText>
             The price of each pixel starts at 0 ETH and it increases
             exponentially each time it is painted.
@@ -78,10 +80,9 @@ export default function Help() {
             it exists) will receive three quarters of the amount payed to
             re-paint the pixel.
           </DialogContentText>
-
-          <DialogTitle>the canvas is yours</DialogTitle>
-
-          <DialogTitle>links</DialogTitle>
+          <DialogTitle>
+            remember, the canvas is yours and also, wagmi.
+          </DialogTitle>
           <DialogContentText>
             <a href="https://fontawesome.com/" target="_blank" rel="noreferrer">
               Icons
