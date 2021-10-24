@@ -13,7 +13,7 @@ export default function getCanvasPosition(previousPosition) {
   const minZoom = Math.max(zoomX, zoomY);
 
   position.minZoom = minZoom;
-  position.maxZoom = position.zoom + 500;
+  position.maxZoom = minZoom + 500;
 
   position.zoom = minZoom + 5;
 
