@@ -12,12 +12,14 @@ import {
   MapButton,
   InfoWrapper,
   CoordinatesWrapper,
-  CloseButton,
+  InfoButton,
+  InfoButtons,
 } from "./Map.styles";
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
 import { MODE } from "../../App";
 import { Message } from "../../App.styles";
+import Share from "../icons/Share";
 
 const MouseController = ({
   position,
@@ -30,9 +32,11 @@ const MouseController = ({
   mode,
   isMobileDevice,
   names,
+  setAlert,
+  selected,
+  setSelected,
 }) => {
   const [mouseCoordinates, setMouseCoordinates] = useState();
-  const [selected, setSelected] = useState();
   const coordinates = isMobileDevice ? selected : selected ?? mouseCoordinates;
 
   useEffect(() => {
@@ -100,7 +104,28 @@ const MouseController = ({
   return (
     <InfoWrapper>
       {selected && (
-        <CloseButton onClick={() => setSelected(undefined)}>[X]</CloseButton>
+        <InfoButtons>
+          <InfoButton
+            title="Share this pixel"
+            aria-label="share this pixel"
+            onClick={() => {
+              const url = `${window.location.origin}?x=${x}&y=${y}&x0=${position.current.xMin}&y0=${position.current.yMin}&zoom=${position.current.zoom}`;
+
+              navigator.clipboard.writeText(url);
+
+              setAlert({
+                severity: "success",
+                dismissibleTime: 3000,
+                title: (
+                  <p>Link copied to clipboard. Share it with your friends!</p>
+                ),
+              });
+            }}
+          >
+            <Share />
+          </InfoButton>
+          <InfoButton onClick={() => setSelected(undefined)}>[x]</InfoButton>
+        </InfoButtons>
       )}
       {chainInfo && (
         <>
@@ -245,6 +270,9 @@ const Map = forwardRef(
       mode,
       isMobileDevice,
       names,
+      setAlert,
+      selected,
+      setSelected,
     },
     ref
   ) => {
@@ -265,6 +293,9 @@ const Map = forwardRef(
           mode={mode}
           isMobileDevice={isMobileDevice}
           names={names}
+          setAlert={setAlert}
+          selected={selected}
+          setSelected={setSelected}
         />
         {isMobile && ready && (
           <MapButton variant="outlined" onClick={() => setMapOpen(!mapOpen)}>

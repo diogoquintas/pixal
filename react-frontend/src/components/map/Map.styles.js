@@ -72,16 +72,12 @@ export const InfoWrapper = styled.div`
   flex-direction: column;
   align-items: flex-end;
   background: black;
-  padding: 1rem;
+  padding: 0.3rem 0.6rem;
   border: 0.1rem solid white;
   box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%),
     0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
   border-radius: 4px;
   box-sizing: border-box;
-
-  & > p {
-    word-break: break-all;
-  }
 
   @media only screen and (max-width: 1136px) {
     bottom: 17rem;
@@ -107,12 +103,29 @@ export const MapButton = styled(Button)`
   }
 `;
 
-export const CloseButton = styled.button`
+export const InfoButtons = styled.div`
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 0.3rem;
+`;
+
+export const InfoButton = styled.button`
   background: none;
   color: white;
   padding: 0;
   margin: 0;
   border: 0;
   cursor: pointer;
-  font-size: 2rem;
+  font-size: 1.5rem;
+
+  & > svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:first-of-type {
+    margin-right: 0.3rem;
+  }
 `;

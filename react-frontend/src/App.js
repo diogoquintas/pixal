@@ -42,6 +42,7 @@ function App() {
   const [pixelsToLoad, setPixelsToLoad] = useState();
   const [stateChainPixels, setStateChainPixels] = useState({});
   const [isMobileDevice] = useState(getIsMobileDevice);
+  const [selected, setSelected] = useState();
 
   const map = useRef(document.createElement("canvas"));
   const mapCtx = useRef(map.current.getContext("2d"));
@@ -526,6 +527,53 @@ function App() {
     initialSetAlert(alertValue);
   };
 
+  const getSearchQuery = () => {
+    let search = window.location.search;
+
+    if (!search || search.length < 1) return;
+
+    search = search.slice(1, search.length);
+
+    const params = search.split("&");
+    const query = {};
+
+    for (const param of params) {
+      const [key, value] = param.split("=");
+
+      query[key] = value;
+    }
+
+    return query;
+  };
+
+  const updatePositionFromLocation = () => {
+    const query = getSearchQuery();
+
+    if (!query) return;
+
+    const { x, y, x0, y0, zoom } = query;
+
+    if (!x || !y || !x0 || !y0 || !zoom) return;
+
+    position.current = {
+      ...position.current,
+      offsetX: -(x0 * zoom),
+      offsetY: -(y0 * zoom),
+      xMin: x0,
+      yMin: y0,
+      zoom,
+    };
+
+    setMode(MODE.move);
+    setSelected({
+      x,
+      y,
+    });
+    updateMarker();
+
+    window.history.pushState({}, document.title, window.location.origin);
+  };
+
   useEffect(() => {
     const canvas = map.current;
     const ctx = mapCtx.current;
@@ -542,6 +590,7 @@ function App() {
   useEffect(() => {
     if (canvasReady) {
       timeSinceLastDraw.current = performance.now();
+      updatePositionFromLocation();
       draw();
       document.body.classList.add("canvas-ready");
     }
@@ -621,6 +670,9 @@ function App() {
         mode={mode}
         isMobileDevice={isMobileDevice}
         names={names}
+        setAlert={setAlert}
+        selected={selected}
+        setSelected={setSelected}
       />
     </>
   );

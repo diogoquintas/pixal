@@ -5,7 +5,7 @@ import { mobileMediaScreen } from "./styles/media";
 export const AlertWrapper = styled.div`
   position: fixed;
   top: 1rem;
-  left: 1rem;
+  left: 0;
   max-width: 32rem;
   max-height: calc(100% - 2rem);
   display: flex;
@@ -17,16 +17,13 @@ export const AlertWrapper = styled.div`
     color: white;
   }
 
-  & p {
-    word-break: break-all;
-  }
-
   ${mobileMediaScreen} {
     width: calc(100% - 2rem);
   }
 `;
 
 export const ErrorPre = styled.pre`
+  margin-top: 0;
   white-space: pre-wrap;
   max-width: 25rem;
   overflow: auto;
@@ -41,7 +38,6 @@ export const Message = styled.p`
   font-size: 0.8rem;
   text-transform: initial;
   margin: 1rem 0;
-  word-break: break-all;
 
   ${hideScrollbar}
 `;

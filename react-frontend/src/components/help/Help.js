@@ -19,9 +19,9 @@ export default function Help() {
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <DialogTitle>what is this</DialogTitle>
+          <DialogTitle>gm</DialogTitle>
           <DialogContentText>
-            it is an interface to a contract in the{" "}
+            welcome, this is an interface to a contract in the{" "}
             <a href="https://ethereum.org/" target="_blank" rel="noreferrer">
               Ethereum blockchain
             </a>
@@ -39,9 +39,8 @@ export default function Help() {
             before interacting with it. This contract was not audited.
           </DialogContentText>
           <DialogContentText>
-            The contract was deployed in Arbitrum. It is a solution to the high
-            gas fees in layer one of Ethereum. If you never interacted with it,
-            follow this{" "}
+            The contract is deployed in Arbitrum. If you never interacted with
+            it, follow this{" "}
             <a
               href="https://arbitrum.io/bridge-tutorial/"
               target="_blank"
@@ -80,9 +79,7 @@ export default function Help() {
             it exists) will receive three quarters of the amount payed to
             re-paint the pixel.
           </DialogContentText>
-          <DialogTitle>
-            remember, the canvas is yours and also, wagmi.
-          </DialogTitle>
+          <DialogTitle>remember, wagmi. the canvas is yours!</DialogTitle>
           <DialogContentText>
             <a href="https://fontawesome.com/" target="_blank" rel="noreferrer">
               Icons

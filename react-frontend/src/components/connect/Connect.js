@@ -113,8 +113,8 @@ export default function Connect({
         title: (
           <>
             &gt;_There was an error reading the blockchain data, make sure
-            you're connected to the correct network. We currently use Arbitrum
-            for lower gas fees, follow this link to{" "}
+            you're connected to the correct network. We're on Arbitrum, follow
+            this link to{" "}
             <a
               target="_blank"
               rel="noreferrer"
