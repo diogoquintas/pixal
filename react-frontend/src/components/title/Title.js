@@ -36,6 +36,8 @@ const H1 = styled.h1`
   margin: 0;
   cursor: url("play.png"), pointer;
   transition: ease-in font-size 150ms;
+  writing-mode: tb-rl;
+  transform: rotate(-180deg);
 
   @media only screen and (max-width: 768px) {
     font-size: 7rem;

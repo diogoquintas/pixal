@@ -11,7 +11,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { ErrorPre } from "../../App.styles";
 import Help from "../help/Help";
-import { ConnectButton, ViewButton } from "./Connect.styles";
+import { ConnectButton, ViewButton, ButtonWrapper } from "./Connect.styles";
 
 export default function Connect({
   setAlert,
@@ -139,7 +139,7 @@ export default function Connect({
 
   return (
     <>
-      <div>
+      <ButtonWrapper>
         <ConnectButton
           color="primary"
           variant="outlined"
@@ -157,7 +157,7 @@ export default function Connect({
           Enter as a viewer
         </ViewButton>
         <Help />
-      </div>
+      </ButtonWrapper>
       <Dialog open={showWalletModal}>
         <DialogTitle>Please install a wallet</DialogTitle>
         <DialogContent>
@@ -165,8 +165,12 @@ export default function Connect({
             We recommend you use{" "}
             <a target="_blank" rel="noreferrer" href="https://metamask.io/">
               Metamask
-            </a>{" "}
-            At the moment, we only support view mode for mobile devices.
+            </a>
+            .{" "}
+          </DialogContentText>
+          <DialogContentText>
+            If your browser does not support metamask or you're using a mobile
+            device you can enter as a viewer.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

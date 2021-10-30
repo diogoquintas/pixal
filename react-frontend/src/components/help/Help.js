@@ -52,12 +52,12 @@ export default function Help() {
           </DialogContentText>
           <DialogTitle>The contract</DialogTitle>
           <DialogContentText>
-            It saves a color code for each coordinate of a 1000x1000 pixel wide
-            board.
+            it works as a painting where the color of each pixel is stored in
+            the blockchain.
           </DialogContentText>
           <DialogContentText>
-            It is open to everyone and there's no limit to the number of pixels
-            you can paint.
+            everyone can paint and the limit is your imagination (and also the
+            boundaries of the painting which is 1000x1000px).
           </DialogContentText>
           <DialogContentText>
             The price of each pixel starts at 0 ETH and it increases
