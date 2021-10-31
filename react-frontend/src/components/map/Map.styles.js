@@ -52,10 +52,18 @@ export const MapWrapper = styled.div`
     0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
   border: 0.1rem solid white;
   transition: ease opacity 150ms;
-  opacity: ${({ canShow }) => (canShow ? 1 : 0)};
+  opacity: 1;
   cursor: pointer;
   background: black;
   overflow: hidden;
+
+  ${({ canShow }) =>
+    !canShow &&
+    css`
+      width: 0;
+      height: 0;
+      opacity: 0;
+    `}
 `;
 
 export const Marker = styled.div`

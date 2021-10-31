@@ -21,26 +21,44 @@ export default function Help() {
         <DialogContent>
           <DialogTitle>gm</DialogTitle>
           <DialogContentText>
-            welcome, this is an interface to a contract in the{" "}
+            This is an experiment. We're still working out some compability
+            issues across devices and browsers. For now, we recommend you to use
+            Desktop Chrome/Brave with the Metamask extension.
+          </DialogContentText>
+          <DialogTitle>what is this</DialogTitle>
+          <DialogContentText>
+            This is a interactive painting with a square shape and 1000 pixels
+            wide. Every pixel of the painting can be painted with a color.{" "}
+          </DialogContentText>
+          <DialogContentText>
+            If you're a fan of Reddit, this is /r/place cousin for web 3.0.
+          </DialogContentText>{" "}
+          <DialogContentText>
+            The painting is stored and distributed by the{" "}
             <a href="https://ethereum.org/" target="_blank" rel="noreferrer">
               Ethereum blockchain
             </a>
             .{" "}
+          </DialogContentText>{" "}
+          <DialogContentText>
+            In order to prevent people from just ruining others people pixels,
+            you have to pay a price to re-paint a pixel. Most of that value is
+            then sent to the previous painter.
           </DialogContentText>
           <DialogContentText>
-            You can and should read{" "}
             <a
               href={`${process.env.REACT_APP_CONTRACT_EXPLORER}${process.env.REACT_APP_CONTRACT_ADDRESS}`}
               target="_blank"
               rel="noreferrer"
             >
-              the code
+              the contract
             </a>{" "}
-            before interacting with it. This contract was not audited.
+            is fairly simple but you should still read it before interacting
+            with it. It was not audit.
           </DialogContentText>
           <DialogContentText>
-            The contract is deployed in Arbitrum. If you never interacted with
-            it, follow this{" "}
+            It was deployed in Arbitrum. If you never connected to it, follow
+            this{" "}
             <a
               href="https://arbitrum.io/bridge-tutorial/"
               target="_blank"
@@ -50,15 +68,7 @@ export default function Help() {
             </a>{" "}
             to connect.
           </DialogContentText>
-          <DialogTitle>The contract</DialogTitle>
-          <DialogContentText>
-            it works as a painting where the color of each pixel is stored in
-            the blockchain.
-          </DialogContentText>
-          <DialogContentText>
-            everyone can paint and the limit is your imagination (and also the
-            boundaries of the painting which is 1000x1000px).
-          </DialogContentText>
+          <DialogTitle>pixelnomics</DialogTitle>
           <DialogContentText>
             The price of each pixel starts at 0 ETH and it increases
             exponentially each time it is painted.
@@ -80,11 +90,16 @@ export default function Help() {
             re-paint the pixel.
           </DialogContentText>
           <DialogTitle>remember, wagmi. the canvas is yours!</DialogTitle>
-          <DialogContentText>
-            <a href="https://fontawesome.com/" target="_blank" rel="noreferrer">
-              Icons
+          <DialogTitle>
+            {" "}
+            <a
+              href="https://twitter.com/pixalproject"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Twitter
             </a>
-          </DialogContentText>
+          </DialogTitle>
         </DialogContent>
       </Dialog>
     </>
