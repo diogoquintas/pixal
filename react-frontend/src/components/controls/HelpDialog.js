@@ -39,10 +39,7 @@ export default function HelpDialog(props) {
         <DialogContentText>[Space] - Interact</DialogContentText>
         <DialogTitle>transactions</DialogTitle>
         <DialogContentText>
-          {`There is no limit to the pixels an account can paint but there is a
-          limit of ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} pixels
-          for each transaction, everything above ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} requires multiple
-          transactions.`}
+          {`currently, there's a limit of ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} pixels per transaction. When you paint over that limit you'll have multiple transactions, in other words, more gas consumtion. This limit is imposed by the current blockchain capabilities.`}
         </DialogContentText>
       </DialogContent>
     </Dialog>
