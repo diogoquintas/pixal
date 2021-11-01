@@ -5,7 +5,7 @@ import { mobileMediaScreen } from "./styles/media";
 export const AlertWrapper = styled.div`
   position: fixed;
   top: 1rem;
-  left: 0;
+  left: 1rem;
   max-width: 32rem;
   max-height: calc(100% - 2rem);
   display: flex;

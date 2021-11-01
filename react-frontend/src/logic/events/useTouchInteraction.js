@@ -7,6 +7,8 @@ export default function useTouchInteraction({
   updateZoom,
   updatePosition,
   disabled,
+  interact,
+  currentMode,
 }) {
   useEffect(() => {
     if (disabled) return;
@@ -19,6 +21,8 @@ export default function useTouchInteraction({
       position,
       updateZoom,
       updatePosition,
+      interact,
+      currentMode,
     });
 
     function isTouchpad(event) {

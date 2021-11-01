@@ -17,6 +17,7 @@ export default function Connect({
   setAlert,
   setPixelsToLoad,
   updateChainPixel,
+  setOnViewOnly,
 }) {
   const [connecting, setConnecting] = useState(false);
   const [connectingAsViewer, setConnectingAsViewer] = useState(false);
@@ -50,6 +51,7 @@ export default function Connect({
 
       window.web3 = new Web3(provider);
       loadChainInfo();
+      setOnViewOnly(false);
     } catch {
       setShowWalletModal(true);
       setConnecting(false);
@@ -69,6 +71,7 @@ export default function Connect({
 
       window.web3 = new Web3(provider);
       loadChainInfo();
+      setOnViewOnly(true);
     } catch {
       setShowWalletModal(true);
       setConnectingAsViewer(false);

@@ -44,6 +44,7 @@ function App() {
   const [stateChainPixels, setStateChainPixels] = useState({});
   const [isMobileDevice] = useState(getIsMobileDevice);
   const [selected, setSelected] = useState();
+  const [onViewOnly, setOnViewOnly] = useState(false);
 
   const map = useRef(document.createElement("canvas"));
   const mapCtx = useRef(map.current.getContext("2d"));
@@ -638,6 +639,7 @@ function App() {
               setTransacting={setTransacting}
               transacting={transacting}
               setAlert={setAlert}
+              onViewOnly={onViewOnly}
             />
           </>
         ) : (
@@ -650,6 +652,7 @@ function App() {
             setAlert={setAlert}
             setPixelsToLoad={setPixelsToLoad}
             updateChainPixel={updateChainPixel}
+            setOnViewOnly={setOnViewOnly}
           />
         </>
       )}
@@ -670,6 +673,7 @@ function App() {
         setAlert={setAlert}
         selected={selected}
         setSelected={setSelected}
+        onViewOnly={onViewOnly}
       />
     </>
   );

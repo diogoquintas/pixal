@@ -14,6 +14,7 @@ import {
   CoordinatesWrapper,
   InfoButton,
   InfoButtons,
+  InfoBlock,
 } from "./Map.styles";
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
@@ -52,10 +53,19 @@ const MouseController = ({
       setMouseCoordinates(nextCoordinates);
     }
 
+    function handleTouchStart(event) {
+      const [touch] = event.touches;
+
+      position.current.mouseX = touch.clientX;
+      position.current.mouseY = touch.clientY;
+    }
+
     document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("touchstart", handleTouchStart);
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("touchstart", handleTouchStart);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -110,7 +120,22 @@ const MouseController = ({
             onClick={() => {
               const url = `${window.location.origin}?x=${x}&y=${y}&x0=${position.current.xMin}&y0=${position.current.yMin}&zoom=${position.current.zoom}`;
 
-              navigator.clipboard.writeText(url);
+              if (
+                navigator.clipboard &&
+                typeof navigator.clipboard.writeText === "function"
+              ) {
+                navigator.clipboard.writeText(url);
+              } else {
+                const text = document.createElement("textarea");
+
+                document.body.appendChild(text);
+
+                text.innerText = url;
+                text.select();
+
+                document.execCommand("copy");
+                document.body.removeChild(text);
+              }
 
               setAlert({
                 severity: "success",
@@ -127,7 +152,7 @@ const MouseController = ({
         </InfoButtons>
       )}
       {chainInfo && (
-        <>
+        <InfoBlock>
           <p>{`painted ${chainInfo.count} time${
             chainInfo.count === 1 ? "" : "s"
           }`}</p>
@@ -137,7 +162,7 @@ const MouseController = ({
           <p>{`painter=${
             names.current[chainInfo.owner]?.name ?? chainInfo.owner
           }`}</p>
-        </>
+        </InfoBlock>
       )}
       <CoordinatesWrapper>
         <Coordinates
@@ -274,7 +299,7 @@ const Map = forwardRef(
     },
     ref
   ) => {
-    const [mapOpen, setMapOpen] = useState(false);
+    const [mapOpen, setMapOpen] = useState(true);
 
     const isMobile = useViewport(mobile);
 

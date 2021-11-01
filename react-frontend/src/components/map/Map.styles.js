@@ -137,3 +137,14 @@ export const InfoButton = styled.button`
     margin-right: 0.3rem;
   }
 `;
+
+export const InfoBlock = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  word-break: break-all;
+
+  ${mobileMediaScreen} {
+    align-items: flex-start;
+  }
+`;

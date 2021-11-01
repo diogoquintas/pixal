@@ -9,6 +9,11 @@ import { MODE } from "../../App";
 
 const StyledCanvas = styled.canvas`
   cursor: cell;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 
   ${({ isMove, isTransacting }) =>
     isMove &&
@@ -83,6 +88,8 @@ const Canvas = forwardRef(
       updatePosition,
       updateZoom,
       disabled: !canvasReady,
+      interact,
+      currentMode,
     });
     useClickInteraction({
       canvasRef,

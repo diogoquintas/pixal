@@ -1,3 +1,5 @@
+import { MODE } from "../../App";
+
 let cachedTouches = [];
 let prevDistanceBetweenTouches = 0;
 
@@ -43,7 +45,7 @@ export function handleTouchStart(event) {
 }
 
 export const buildTouchMove =
-  ({ position, updateZoom, updatePosition }) =>
+  ({ position, updateZoom, updatePosition, interact, currentMode }) =>
   (event) => {
     event.preventDefault();
 
@@ -79,12 +81,21 @@ export const buildTouchMove =
       const [touch] = touches;
       const [cachedTouch, cachedTouchIndex] = getCachedTouch(touch);
 
-      if (!cachedTouch) return;
+      const isMove = currentMode.current === MODE.move;
 
-      updatePosition(
-        -(touch.clientX - cachedTouch.clientX),
-        -(touch.clientY - cachedTouch.clientY)
-      );
+      if (isMove) {
+        if (!cachedTouch) return;
+
+        updatePosition(
+          -(touch.clientX - cachedTouch.clientX),
+          -(touch.clientY - cachedTouch.clientY)
+        );
+      } else {
+        position.current.mouseX = touch.clientX;
+        position.current.mouseY = touch.clientY;
+
+        interact();
+      }
 
       cachedTouches[cachedTouchIndex] = touch;
     }

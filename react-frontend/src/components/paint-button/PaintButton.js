@@ -8,12 +8,13 @@ export default function PaintButton({
   setTransacting,
   pixelList,
   setAlert,
+  onViewOnly,
   ...remainingProps
 }) {
   return (
     <Control
       variant="contained"
-      disabled={transacting}
+      disabled={transacting || onViewOnly}
       onClick={async () => {
         setTransacting(true);
         setAlert(undefined);
