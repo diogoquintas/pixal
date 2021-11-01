@@ -30,14 +30,3 @@ export const ErrorPre = styled.pre`
 
   ${hideScrollbar}
 `;
-
-export const Message = styled.p`
-  max-width: 28rem;
-  max-height: 7rem;
-  overflow: hidden;
-  font-size: 0.8rem;
-  text-transform: initial;
-  margin: 1rem 0;
-
-  ${hideScrollbar}
-`;

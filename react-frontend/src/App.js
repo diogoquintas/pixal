@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { storageGetPixels, storageUpdatePixels } from "./logic/storage/pixels";
 import Canvas from "./components/canvas/Canvas";
 import Loading from "./components/loading/Loading";
-import { AlertWrapper, Message } from "./App.styles";
+import { AlertWrapper } from "./App.styles";
 import Alert from "@mui/material/Alert";
 import Title from "./components/title/Title";
 import useTimeout from "./logic/useTimeout";
@@ -15,6 +15,7 @@ import { AlertTitle } from "@mui/material";
 import getIsValidColor from "./logic/isValidColor";
 import getIsMobileDevice from "./logic/isMobileDevice";
 import getName from "./logic/blockchain/getName";
+import getPixel from "./logic/blockchain/getPixel";
 
 export const BOARD_SIZE = 1000;
 export const MODE = {
@@ -94,13 +95,9 @@ function App() {
   };
 
   const parsePixel = (pixel) => {
-    const {
-      color,
-      coordinates: [x, y],
-      owner,
-      count,
-    } = pixel;
+    const { color: hexColorValue, x, y, owner, count } = pixel;
 
+    const color = hexColorValue.replace("0x", "#");
     const isValidColor = getIsValidColor(color);
     const name = names.current[owner];
 
@@ -110,7 +107,6 @@ function App() {
 
     return {
       color: isValidColor ? color : "#000000",
-      message: isValidColor ? undefined : color.slice(0, 280),
       owner,
       count: Number(count),
       x: Number(x),
@@ -336,19 +332,16 @@ function App() {
       chainPixelsToUpdate.current = {};
 
       if (pixelToAlert.current) {
-        const { count, x, y, owner, color, message } = pixelToAlert.current;
+        const { count, x, y, owner, color } = pixelToAlert.current;
         const price = window.web3.utils.fromWei(`${getPixelPrice(count)}`);
         const name = names.current[owner]?.name ?? owner;
 
         setAlert({
           severity: "info",
-          dismissibleTime: message ? 10000 : 5000,
+          dismissibleTime: 5000,
           title: (
             <>
-              <p>{`>_${name} painted at <${x}, ${y}> ${
-                message ? "👀" : `in the color ${color} 🎨`
-              }`}</p>
-              {message && <Message>{`"${message}"`}</Message>}
+              <p>{`>_${name} painted at <${x}, ${y}> in the color ${color} 🎨`}</p>
               <p>{`Current pixel price is ${price} ETH`}</p>
             </>
           ),
@@ -404,26 +397,30 @@ function App() {
     updateImageWhenPossible();
   };
 
-  const updateChainPixel = (_, update) => {
-    const pixel = update?.returnValues?._paintedPixel;
+  const updateChainPixel = async (_, update) => {
+    const coordinates = update?.returnValues ?? {};
 
-    if (!pixel) return;
+    if (!coordinates) return;
 
-    const pixelInfo = parsePixel(pixel);
-    const { id, x, y, owner } = pixelInfo;
+    try {
+      const pixelDetails = await getPixel(coordinates.x, coordinates.y);
 
-    const isFromAccount = owner === window.account;
+      const pixelInfo = parsePixel(pixelDetails);
+      const { id, x, y, owner } = pixelInfo;
 
-    chainPixels.current[id] = pixelInfo;
-    chainPixelsToUpdate.current[id] = pixelInfo;
+      const isFromAccount = owner === window.account;
 
-    revertPixel({ x, y, removeFromList: isFromAccount });
+      chainPixels.current[id] = pixelInfo;
+      chainPixelsToUpdate.current[id] = pixelInfo;
 
-    if (!isFromAccount) {
-      pixelToAlert.current = pixelInfo;
-    }
+      revertPixel({ x, y, removeFromList: isFromAccount });
 
-    updateChainPixelsWhenPossible();
+      if (!isFromAccount) {
+        pixelToAlert.current = pixelInfo;
+      }
+
+      updateChainPixelsWhenPossible();
+    } catch {}
   };
 
   const getPixelCoordinates = (offsetX = 0, offsetY = 0) => {

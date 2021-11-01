@@ -12,10 +12,7 @@ export default async function getTransactions(options) {
   console.log("start", options);
 
   const target = pixels.slice(startIndex, endIndex);
-  const value = target.reduce(
-    (acc, pixel, index) => acc + pixelsPrice[index],
-    0
-  );
+  const value = target.reduce((acc, _, index) => acc + pixelsPrice[index], 0);
 
   let gas = 0;
 

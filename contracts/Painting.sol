@@ -4,21 +4,18 @@ pragma solidity >=0.7.0 <0.9.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-struct Coordinates {
+struct PixelInfo {
     uint16 x;
     uint16 y;
-}
-
-struct PixelInfo {
-    string color;
+    bytes3 color;
     uint256 count;
-    Coordinates coordinates;
     address payable owner;
 }
 
 struct Pixel {
-    string color;
-    Coordinates coordinates;
+    uint16 x;
+    uint16 y;
+    bytes3 color;
 }
 
 contract Painting is ReentrancyGuard, Ownable {
@@ -28,45 +25,39 @@ contract Painting is ReentrancyGuard, Ownable {
 
     PixelInfo[] pixels;
 
-    // Map the pixelId (x and y) to the corresponding position in the pixels array
     mapping(bytes => uint256) pixelPositionById;
 
-    event PixelPainted(PixelInfo _paintedPixel);
+    event PixelPainted(uint16 x, uint16 y);
 
-    function pixelId(Coordinates memory coordinates)
+    function pixelId(uint16 x, uint16 y)
         internal
         view
         virtual
         returns (bytes memory)
     {
-        return abi.encodePacked(coordinates.x, coordinates.y);
+        return abi.encodePacked(x, y);
     }
 
-    function pixelPosition(Coordinates memory coordinates)
-        public
-        view
-        virtual
-        returns (uint256)
-    {
-        bytes memory id = pixelId(coordinates);
+    function pixelPosition(uint16 x, uint16 y) internal view returns (uint256) {
+        bytes memory id = pixelId(x, y);
 
         return pixelPositionById[id];
     }
 
-    function pixelInfo(Coordinates memory coordinates)
+    function pixelInfo(uint16 x, uint16 y)
         public
         view
         virtual
         returns (PixelInfo memory)
     {
-        uint256 position = pixelPosition(coordinates);
+        uint256 position = pixelPosition(x, y);
 
         require(position > 0, "Pixel does not exist");
 
         return pixels[position - 1];
     }
 
-    function pixelPrice(uint256 count) public view virtual returns (uint256) {
+    function pixelPrice(uint256 count) internal pure returns (uint256) {
         if (count >= pricePowerCap) {
             return referencePrice * 10**pricePowerCap;
         }
@@ -74,21 +65,19 @@ contract Painting is ReentrancyGuard, Ownable {
         return referencePrice * 10**count;
     }
 
-    function ownerShare(uint256 price) public view virtual returns (uint256) {
+    function ownerShare(uint256 price) internal pure returns (uint256) {
         return (price * 3) / 4;
     }
 
     function paint(
-        Coordinates memory coordinates,
-        string memory color,
+        uint16 x,
+        uint16 y,
+        bytes3 color,
         uint256 funds
     ) internal returns (uint256) {
-        require(
-            coordinates.x < boundary && coordinates.y < boundary,
-            "Coordinates out of range"
-        );
+        require(x < boundary && y < boundary, "Coordinates out of range");
 
-        uint256 position = pixelPosition(coordinates);
+        uint256 position = pixelPosition(x, y);
 
         if (position > 0) {
             uint256 index = position - 1;
@@ -103,14 +92,14 @@ contract Painting is ReentrancyGuard, Ownable {
 
             previousOwner.transfer(ownerShare(price));
 
-            emit PixelPainted(pixels[index]);
+            emit PixelPainted(x, y);
 
             return price;
         } else {
-            pixelPositionById[pixelId(coordinates)] = pixels.length + 1;
-            pixels.push(PixelInfo(color, 1, coordinates, payable(msg.sender)));
+            pixelPositionById[pixelId(x, y)] = pixels.length + 1;
+            pixels.push(PixelInfo(x, y, color, 1, payable(msg.sender)));
 
-            emit PixelPainted(pixels[pixels.length - 1]);
+            emit PixelPainted(x, y);
 
             return 0;
         }
@@ -125,7 +114,8 @@ contract Painting is ReentrancyGuard, Ownable {
 
         for (uint256 i = 0; i < pixelsToPaint.length; i++) {
             uint256 expendedFunds = paint(
-                pixelsToPaint[i].coordinates,
+                pixelsToPaint[i].x,
+                pixelsToPaint[i].y,
                 pixelsToPaint[i].color,
                 funds
             );

@@ -3,7 +3,11 @@ const MAX_PIXELS_PER_TRANSACTION = Number(
 );
 
 export default function paint({ pixelList, setAlert }) {
-  const pixels = pixelList.map(({ x, y, color }) => [color, [x, y]]);
+  const pixels = pixelList.map(({ x, y, color }) => [
+    x,
+    y,
+    color.replace("#", "0x"),
+  ]);
 
   let currentBatch = 0;
 
@@ -38,6 +42,8 @@ export default function paint({ pixelList, setAlert }) {
       </>
     ),
   });
+
+  console.log(batches);
 
   return Promise.all(
     batches.map((batch) =>

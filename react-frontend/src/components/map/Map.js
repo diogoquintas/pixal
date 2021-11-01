@@ -18,7 +18,6 @@ import {
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
 import { MODE } from "../../App";
-import { Message } from "../../App.styles";
 import Share from "../icons/Share";
 
 const MouseController = ({
@@ -140,7 +139,6 @@ const MouseController = ({
           }`}</p>
         </>
       )}
-      {chainInfo?.message && <Message>{`"${chainInfo.message}"`}</Message>}
       <CoordinatesWrapper>
         <Coordinates
           color={chainInfo?.color}

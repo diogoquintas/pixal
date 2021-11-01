@@ -5,7 +5,7 @@ export default async function paint({ pixelList, setAlert }) {
   const pixels = pixelList.map(({ price, color, x, y }) => {
     pixelsPrice.push(price);
 
-    return [color, [x, y]];
+    return [x, y, color.replace("#", "0x")];
   });
 
   setAlert({
