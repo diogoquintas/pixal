@@ -96,20 +96,20 @@ function App() {
   };
 
   const parsePixel = (pixel) => {
-    const { color: hexColorValue, x, y, owner, count } = pixel;
+    const { color: hexColorValue, x, y, author, timesPainted } = pixel;
 
     const color = hexColorValue.replace("0x", "#");
     const isValidColor = getIsValidColor(color);
-    const name = names.current[owner];
+    const name = names.current[author];
 
     if (!name) {
-      findName(owner);
+      findName(author);
     }
 
     return {
       color: isValidColor ? color : "#000000",
-      owner,
-      count: Number(count),
+      author,
+      timesPainted: Number(timesPainted),
       x: Number(x),
       y: Number(y),
       id: `${x}-${y}`,
@@ -229,7 +229,7 @@ function App() {
     ctx.clearRect(0, 0, map.width, map.height);
 
     pixelsToLoad.forEach((pixel) => {
-      if (pixel.count === "0") return;
+      if (pixel.timesPainted === "0") return;
 
       const pixelInfo = parsePixel(pixel);
       const { id, x, y, color } = pixelInfo;
@@ -333,9 +333,11 @@ function App() {
       chainPixelsToUpdate.current = {};
 
       if (pixelToAlert.current) {
-        const { count, x, y, owner, color } = pixelToAlert.current;
-        const price = window.web3.utils.fromWei(`${getPixelPrice(count)}`);
-        const name = names.current[owner]?.name ?? owner;
+        const { timesPainted, x, y, author, color } = pixelToAlert.current;
+        const price = window.web3.utils.fromWei(
+          `${getPixelPrice(timesPainted)}`
+        );
+        const name = names.current[author]?.name ?? author;
 
         setAlert({
           severity: "info",
@@ -407,9 +409,9 @@ function App() {
       const pixelDetails = await getPixel(coordinates.x, coordinates.y);
 
       const pixelInfo = parsePixel(pixelDetails);
-      const { id, x, y, owner } = pixelInfo;
+      const { id, x, y, author } = pixelInfo;
 
-      const isFromAccount = owner === window.account;
+      const isFromAccount = author === window.account;
 
       chainPixels.current[id] = pixelInfo;
       chainPixelsToUpdate.current[id] = pixelInfo;

@@ -15,7 +15,6 @@ export default function Help() {
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <DialogTitle>GM</DialogTitle>
           <DialogContentText>
             We're working out some compatibility issues across devices and
             browsers. For now, we recommend the use of desktop browser
@@ -88,7 +87,7 @@ export default function Help() {
             pixel can have is 1.000.000 ETH.
           </DialogContentText>
           <DialogContentText>
-            Every time a pixel is painted, the previous owner of that pixel (if
+            Every time a pixel is painted, the previous author of that pixel (if
             it exists) will receive three quarters of the amount payed to
             re-paint the pixel.
           </DialogContentText>

@@ -96,8 +96,8 @@ export default function PixelList({
         const [x, y] = id.split("-");
 
         const onChain = stateChainPixels[id];
-        const count = onChain?.count ?? 0;
-        const price = getPixelPrice(count);
+        const timesPainted = onChain?.timesPainted ?? 0;
+        const price = getPixelPrice(timesPainted);
 
         listTotal = listTotal + price;
 
@@ -106,9 +106,9 @@ export default function PixelList({
           x,
           y,
           color: pixels[id],
-          owner: onChain?.owner,
+          author: onChain?.author,
           price,
-          count,
+          timesPainted,
         };
       });
 

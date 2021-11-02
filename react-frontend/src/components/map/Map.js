@@ -159,14 +159,14 @@ const MouseController = ({
       )}
       {chainInfo && (
         <InfoBlock>
-          <p>{`PAINTED ${chainInfo.count} TIME${
-            chainInfo.count === 1 ? "" : "S"
+          <p>{`PAINTED ${chainInfo.timesPainted} TIME${
+            chainInfo.timesPainted === 1 ? "" : "S"
           }`}</p>
           <p>{`PRICE=${window.web3.utils.fromWei(
-            `${getPixelPrice(chainInfo.count)}`
+            `${getPixelPrice(chainInfo.timesPainted)}`
           )} ETH`}</p>
-          <p>{`PAINTER=${
-            names.current[chainInfo.owner]?.name ?? chainInfo.owner
+          <p>{`AUTHOR=${
+            names.current[chainInfo.author]?.name ?? chainInfo.author
           }`}</p>
         </InfoBlock>
       )}

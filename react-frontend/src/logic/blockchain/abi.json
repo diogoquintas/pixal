@@ -114,16 +114,16 @@
           },
           {
             "internalType": "uint256",
-            "name": "count",
+            "name": "timesPainted",
             "type": "uint256"
           },
           {
             "internalType": "address payable",
-            "name": "owner",
+            "name": "author",
             "type": "address"
           }
         ],
-        "internalType": "struct PixelInfo",
+        "internalType": "struct PixelInformation",
         "name": "",
         "type": "tuple"
       }
@@ -178,16 +178,16 @@
           },
           {
             "internalType": "uint256",
-            "name": "count",
+            "name": "timesPainted",
             "type": "uint256"
           },
           {
             "internalType": "address payable",
-            "name": "owner",
+            "name": "author",
             "type": "address"
           }
         ],
-        "internalType": "struct PixelInfo[]",
+        "internalType": "struct PixelInformation[]",
         "name": "",
         "type": "tuple[]"
       }
@@ -216,7 +216,13 @@
     "type": "function"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "funds",
+        "type": "uint256"
+      }
+    ],
     "name": "withdraw",
     "outputs": [],
     "stateMutability": "nonpayable",

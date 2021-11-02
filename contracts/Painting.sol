@@ -4,12 +4,12 @@ pragma solidity >=0.7.0 <0.9.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-struct PixelInfo {
+struct PixelInformation {
     uint16 x;
     uint16 y;
     bytes3 color;
-    uint256 count;
-    address payable owner;
+    uint256 timesPainted;
+    address payable author;
 }
 
 struct Pixel {
@@ -18,14 +18,21 @@ struct Pixel {
     bytes3 color;
 }
 
+/**
+ * @dev A two dimensional painting, each pixel can have a specific color.
+ *
+ *  The painting size is 1000x1000 pixels.
+ *  The first time a pixel is painted is free but to re-paint a pixel
+ *  it is required to pay the respective `pixelPrice`.
+ */
 contract Painting is ReentrancyGuard, Ownable {
-    uint8 constant pricePowerCap = 11;
-    uint16 constant boundary = 1000;
     uint256 constant referencePrice = 0.00001 ether;
 
-    PixelInfo[] pixels;
+    PixelInformation[] pixels;
 
-    mapping(bytes => uint256) pixelPositionById;
+    /// Mapping between a pixel coordinate and its corresponding position in 'pixels' array.
+    /// Usefull to check if a pixel is painted.
+    mapping(bytes => uint256) pixelPositions;
 
     event PixelPainted(uint16 x, uint16 y);
 
@@ -41,14 +48,14 @@ contract Painting is ReentrancyGuard, Ownable {
     function pixelPosition(uint16 x, uint16 y) internal view returns (uint256) {
         bytes memory id = pixelId(x, y);
 
-        return pixelPositionById[id];
+        return pixelPositions[id];
     }
 
     function pixelInfo(uint16 x, uint16 y)
         public
         view
         virtual
-        returns (PixelInfo memory)
+        returns (PixelInformation memory)
     {
         uint256 position = pixelPosition(x, y);
 
@@ -57,47 +64,55 @@ contract Painting is ReentrancyGuard, Ownable {
         return pixels[position - 1];
     }
 
-    function pixelPrice(uint256 count) internal pure returns (uint256) {
-        if (count >= pricePowerCap) {
-            return referencePrice * 10**pricePowerCap;
+    function pixelPrice(uint256 timesPainted) internal pure returns (uint256) {
+        if (timesPainted >= 11) {
+            return referencePrice * 10**11;
         }
 
-        return referencePrice * 10**count;
+        return referencePrice * 10**timesPainted;
     }
 
-    function ownerShare(uint256 price) internal pure returns (uint256) {
+    function authorCut(uint256 price) internal pure returns (uint256) {
         return (price * 3) / 4;
     }
 
+    /**
+     * @dev Internal paint function, called by 'paintPixels'.
+     *
+     * Update the pixel information and pay the previous author when the pixel is already painted (position > 0).
+     * Otherwise, create the new pixel.
+     * Emits an event when a pixel is painted which is useful for frontend applications to know they should re-render that specific pixel.
+     * Returns the spent funds.
+     */
     function paint(
         uint16 x,
         uint16 y,
         bytes3 color,
         uint256 funds
     ) internal returns (uint256) {
-        require(x < boundary && y < boundary, "Coordinates out of range");
+        require(x < 1000 && y < 1000, "Coordinates out of range");
 
         uint256 position = pixelPosition(x, y);
 
         if (position > 0) {
             uint256 index = position - 1;
-            uint256 price = pixelPrice(pixels[index].count);
-            address payable previousOwner = pixels[index].owner;
+            uint256 price = pixelPrice(pixels[index].timesPainted);
+            address payable previousAuthor = pixels[index].author;
 
             require(funds >= price && funds - price >= 0, "Not enough funds");
 
             pixels[index].color = color;
-            pixels[index].owner = payable(msg.sender);
-            pixels[index].count += 1;
+            pixels[index].author = payable(msg.sender);
+            pixels[index].timesPainted += 1;
 
-            previousOwner.transfer(ownerShare(price));
+            previousAuthor.transfer(authorCut(price));
 
             emit PixelPainted(x, y);
 
             return price;
         } else {
-            pixelPositionById[pixelId(x, y)] = pixels.length + 1;
-            pixels.push(PixelInfo(x, y, color, 1, payable(msg.sender)));
+            pixelPositions[pixelId(x, y)] = pixels.length + 1;
+            pixels.push(PixelInformation(x, y, color, 1, payable(msg.sender)));
 
             emit PixelPainted(x, y);
 
@@ -105,6 +120,12 @@ contract Painting is ReentrancyGuard, Ownable {
         }
     }
 
+    /**
+     * @dev The painting function.
+     *
+     * It goes through the 'pixelsToPaint' array and tries to paint them with the received value.
+     * Reverts if there's not enough funds to cover the expense.
+     */
     function paintPixels(Pixel[] memory pixelsToPaint)
         public
         payable
@@ -124,15 +145,21 @@ contract Painting is ReentrancyGuard, Ownable {
         }
     }
 
+    /**
+     * @dev The listing function, it returns the current painting state as an array of `PixelInformation`.
+     *
+     * Contract function calls have a data size limit, for that reason, this function accepts a 'page' and 'pageSize'.
+     * Those arguments can be used (coupled with 'pixelsCount') to get the painting data in digestible chunks.
+     */
     function pixelsInfo(uint256 page, uint256 pageSize)
         public
         view
         virtual
-        returns (PixelInfo[] memory)
+        returns (PixelInformation[] memory)
     {
         require(page > 0, "Page must be higher than 0");
 
-        PixelInfo[] memory result = new PixelInfo[](pageSize);
+        PixelInformation[] memory result = new PixelInformation[](pageSize);
         uint256 pixelIndex = (page - 1) * pageSize;
 
         for (uint256 i = 0; i < pageSize; i++) {
@@ -151,8 +178,8 @@ contract Painting is ReentrancyGuard, Ownable {
         return pixels.length;
     }
 
-    function withdraw() external onlyOwner {
-        payable(owner()).transfer(address(this).balance);
+    function withdraw(uint256 funds) external onlyOwner {
+        payable(owner()).transfer(funds);
     }
 
     receive() external payable {}
