@@ -4,29 +4,27 @@ import { useRef, useState } from "react";
 
 const marquiesh = keyframes`
  0% {
-    transform: scale(1);
+    transform: scaleX(1) translate(-50%, -50%) rotate(225deg);
   }
 
   98% {
-    transform: scale(0.1);
+    transform: scaleX(0.1) translate(-50%, -50%) rotate(225deg);
     color: orangered;
-    
   }
 
   99% {
-    transform: scale(10);
+    transform: scaleX(10) translate(-50%, -50%) rotate(225deg);
     color: red;
-    
   }
 
   100% {
-    transform: scale(10);
+    transform: scaleX(10) translate(-50%, -50%) rotate(225deg);
     color: black;
   }
 `;
 
 const H1 = styled.h1`
-  font-size: 13rem;
+  font-size: 5rem;
   text-transform: uppercase;
   font-weight: bold;
   color: var(--secondary-color);
@@ -39,20 +37,16 @@ const H1 = styled.h1`
   writing-mode: tb-rl;
   transform: rotate(-180deg);
 
-  @media only screen and (max-width: 768px) {
-    font-size: 7rem;
-  }
-
   ${({ animate }) =>
     animate &&
     css`
+      position: fixed;
+      top: 50%;
+      left: 50%;
       font-size: 62rem;
+      transform: translate(-50%, -50%) rotate(225deg);
       animation: ${marquiesh} 82s ease 10ms forwards;
       cursor: url("stop.png"), pointer;
-
-      @media only screen and (max-width: 768px) {
-        font-size: 41rem;
-      }
     `}
 `;
 

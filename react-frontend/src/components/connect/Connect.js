@@ -144,7 +144,6 @@ export default function Connect({
     <>
       <ButtonWrapper>
         <ConnectButton
-          color="primary"
           variant="outlined"
           loading={connecting}
           onClick={connect}
@@ -152,8 +151,7 @@ export default function Connect({
           Enter with your wallet
         </ConnectButton>
         <ViewButton
-          color="primary"
-          variant="contained"
+          variant="outlined"
           loading={connectingAsViewer}
           onClick={connectAsViewer}
         >

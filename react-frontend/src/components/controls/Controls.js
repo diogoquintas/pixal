@@ -44,7 +44,7 @@ export default function Controls({ mode, setMode, color, size }) {
           onClick={() => setMode(MODE.delete)}
           variant={isDelete ? "contained" : "outlined"}
           aria-label="Set to delete"
-          title="Select delete"
+          title="Set to delete"
         >
           <Eraser />
         </Control>

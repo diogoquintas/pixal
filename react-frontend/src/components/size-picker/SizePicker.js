@@ -27,9 +27,11 @@ export default function SizePicker({ size: sizeRef }) {
   return (
     <Wrapper>
       <Slider
+        name="size"
         value={size}
         onChange={(e, newSize) => setSize(newSize)}
-        aria-label="Select pixel size"
+        aria-label="Select the brush size"
+        title="Select the brush size"
         step={1}
         min={MIN_SIZE}
         max={MAX_SIZE}

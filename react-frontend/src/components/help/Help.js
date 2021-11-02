@@ -10,29 +10,26 @@ export default function Help() {
 
   return (
     <>
-      <HelpButton
-        variant="outlined"
-        color="secondary"
-        onClick={() => setOpen(true)}
-      >
+      <HelpButton variant="outlined" onClick={() => setOpen(true)}>
         ?
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <DialogTitle>gm</DialogTitle>
+          <DialogTitle>GM</DialogTitle>
           <DialogContentText>
-            This is an experiment. We're still working out some compability
-            issues across devices and browsers. For now, we recommend you to use
-            Desktop Chrome/Brave with the Metamask extension.
+            We're working out some compatibility issues across devices and
+            browsers. For now, we recommend the use of desktop browser
+            Chrome/Brave with the Metamask extension.
           </DialogContentText>
-          <DialogTitle>what is this</DialogTitle>
+          <DialogTitle>What is this?</DialogTitle>
           <DialogContentText>
-            This is a interactive painting with a square shape and 1000 pixels
-            wide. Every pixel of the painting can be painted with a color.{" "}
-          </DialogContentText>
-          <DialogContentText>
-            If you're a fan of Reddit, this is /r/place cousin for web 3.0.
+            This is an interactive painting. It is a square which measures
+            1000x1000 pixels. Every pixel can be painted, selecting a specific
+            color.{" "}
           </DialogContentText>{" "}
+          <DialogContentText>
+            If you're a reddit fan, this is a cousin of /R/place for web 3.0.
+          </DialogContentText>
           <DialogContentText>
             The painting is stored and distributed by the{" "}
             <a href="https://ethereum.org/" target="_blank" rel="noreferrer">
@@ -40,10 +37,16 @@ export default function Help() {
             </a>
             .{" "}
           </DialogContentText>{" "}
+          <DialogTitle>Rules</DialogTitle>
           <DialogContentText>
-            In order to prevent people from just ruining others people pixels,
-            you have to pay a price to re-paint a pixel. Most of that value is
-            then sent to the previous painter.
+            The blank space is free. Unleash your creativity.
+          </DialogContentText>
+          <DialogContentText>
+            As a sign of respect to the person who painted before you, if you
+            want to repaint a pixel you need to pay.
+          </DialogContentText>
+          <DialogContentText>
+            75% of that value goes to the previous painter.
           </DialogContentText>
           <DialogContentText>
             <a
@@ -51,24 +54,24 @@ export default function Help() {
               target="_blank"
               rel="noreferrer"
             >
-              the contract
+              The contract
             </a>{" "}
-            is fairly simple but you should still read it before interacting
-            with it. It was not audit.
+            is fairly simple but you should still read it before painting. It
+            was not audited.
           </DialogContentText>
           <DialogContentText>
-            It was deployed in Arbitrum. If you never connected to it, follow
-            this{" "}
+            It was deployed in Arbitrum. In case this is your first time
+            connecting to Arbitrum, follow this{" "}
             <a
               href="https://arbitrum.io/bridge-tutorial/"
               target="_blank"
               rel="noreferrer"
             >
               Arbitrum bridge tutorial
-            </a>{" "}
-            to connect.
+            </a>
+            .
           </DialogContentText>
-          <DialogTitle>pixelnomics</DialogTitle>
+          <DialogTitle>Pixelnomics</DialogTitle>
           <DialogContentText>
             The price of each pixel starts at 0 ETH and it increases
             exponentially each time it is painted.

@@ -28,7 +28,8 @@ export default function ColorPicker({ color: colorRef }) {
         id="colorPicker"
         type="color"
         name="color"
-        aria-label="Select color"
+        aria-label="Pick a color"
+        title="Pick a color"
         value={color}
         onChange={(event) => {
           setColor(event.target.value);

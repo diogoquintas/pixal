@@ -116,7 +116,7 @@ const MouseController = ({
         <InfoButtons>
           <InfoButton
             title="Share this pixel"
-            aria-label="share this pixel"
+            aria-label="Share this pixel"
             onClick={() => {
               const url = `${window.location.origin}?x=${x}&y=${y}&x0=${position.current.xMin}&y0=${position.current.yMin}&zoom=${position.current.zoom}`;
 
@@ -148,18 +148,24 @@ const MouseController = ({
           >
             <Share />
           </InfoButton>
-          <InfoButton onClick={() => setSelected(undefined)}>[x]</InfoButton>
+          <InfoButton
+            title="Close"
+            aria-label="Close"
+            onClick={() => setSelected(undefined)}
+          >
+            [x]
+          </InfoButton>
         </InfoButtons>
       )}
       {chainInfo && (
         <InfoBlock>
-          <p>{`painted ${chainInfo.count} time${
-            chainInfo.count === 1 ? "" : "s"
+          <p>{`PAINTED ${chainInfo.count} TIME${
+            chainInfo.count === 1 ? "" : "S"
           }`}</p>
-          <p>{`price=${window.web3.utils.fromWei(
+          <p>{`PRICE=${window.web3.utils.fromWei(
             `${getPixelPrice(chainInfo.count)}`
           )} ETH`}</p>
-          <p>{`painter=${
+          <p>{`PAINTER=${
             names.current[chainInfo.owner]?.name ?? chainInfo.owner
           }`}</p>
         </InfoBlock>
