@@ -13,6 +13,18 @@ import { ErrorPre } from "../../App.styles";
 import Help from "../help/Help";
 import { ConnectButton, ViewButton, ButtonWrapper } from "./Connect.styles";
 
+export const CHAIN_PARAMS = {
+  chainId: process.env.REACT_APP_CHAIN_ID,
+  chainName: process.env.REACT_APP_CHAIN_NAME,
+  nativeCurrency: {
+    name: "Ethereum",
+    symbol: "ETH",
+    decimals: 18,
+  },
+  rpcUrls: [process.env.REACT_APP_CHAIN_RPC_URL],
+  blockExplorerUrls: [process.env.REACT_APP_CONTRACT_EXPLORER],
+};
+
 export default function Connect({
   setAlert,
   setPixelsToLoad,
@@ -81,6 +93,45 @@ export default function Connect({
   };
 
   const loadChainInfo = async () => {
+    const isCorrectNetwork =
+      window.ethereum.networkVersion === process.env.REACT_APP_CHAIN_ID;
+
+    if (!isCorrectNetwork) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [
+            {
+              chainId: window.web3.utils.toHex(process.env.REACT_APP_CHAIN_ID),
+            },
+          ],
+        });
+      } catch (switchError) {
+        // This error code indicates that the chain has not been added to MetaMask.
+        if (switchError.code === 4902) {
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [CHAIN_PARAMS],
+            });
+          } catch (err) {
+            setErrorAlert({
+              err,
+              title: (
+                <>
+                  &gt;_There was an error connecting to your account, make sure
+                  you have an account selected
+                </>
+              ),
+            });
+            setConnecting(false);
+            setConnectingAsViewer(false);
+            return;
+          }
+        }
+      }
+    }
+
     try {
       await loadAccount();
     } catch (err) {
