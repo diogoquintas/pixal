@@ -4,18 +4,18 @@ pragma solidity >=0.7.0 <0.9.0;
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-struct PixelInformation {
-    uint16 x;
-    uint16 y;
-    bytes3 color;
-    uint256 timesPainted;
-    address payable author;
-}
-
 struct Pixel {
     uint16 x;
     uint16 y;
     bytes3 color;
+}
+
+struct Details {
+    uint16 x;
+    uint16 y;
+    bytes3 color;
+    uint256 timesPainted;
+    address author;
 }
 
 /**
@@ -23,20 +23,20 @@ struct Pixel {
  *
  *  The painting size is 1000x1000 pixels.
  *  The first time a pixel is painted is free but to re-paint a pixel
- *  it is required to pay the respective `pixelPrice`.
+ *  it is required to pay the respective `price`.
  */
 contract Painting is ReentrancyGuard, Ownable {
-    uint256 constant referencePrice = 0.00001 ether;
+    uint256 constant basePrice = 0.00001 ether;
 
-    PixelInformation[] pixels;
+    Details[] pixels;
 
-    /// Mapping between a pixel coordinate and its corresponding position in 'pixels' array.
+    /// Mapping between a pixel coordinate and its corresponding position inside the pixel list.
     /// Usefull to check if a pixel is painted.
-    mapping(bytes => uint256) pixelPositions;
+    mapping(bytes => uint256) positions;
 
     event PixelPainted(uint16 x, uint16 y);
 
-    function pixelId(uint16 x, uint16 y)
+    function id(uint16 x, uint16 y)
         internal
         view
         virtual
@@ -45,46 +45,22 @@ contract Painting is ReentrancyGuard, Ownable {
         return abi.encodePacked(x, y);
     }
 
-    function pixelPosition(uint16 x, uint16 y) internal view returns (uint256) {
-        bytes memory id = pixelId(x, y);
-
-        return pixelPositions[id];
-    }
-
-    function pixelInfo(uint16 x, uint16 y)
-        public
-        view
-        virtual
-        returns (PixelInformation memory)
-    {
-        uint256 position = pixelPosition(x, y);
-
-        require(position > 0, "Pixel does not exist");
-
-        return pixels[position - 1];
-    }
-
-    function pixelPrice(uint256 timesPainted) internal pure returns (uint256) {
+    function price(uint256 timesPainted) internal pure returns (uint256) {
         if (timesPainted >= 11) {
-            return referencePrice * 10**11;
+            return basePrice * 10**11;
         }
 
-        return referencePrice * 10**timesPainted;
-    }
-
-    function authorCut(uint256 price) internal pure returns (uint256) {
-        return (price * 3) / 4;
+        return basePrice * 10**timesPainted;
     }
 
     /**
-     * @dev Internal paint function, called by 'paintPixels'.
+     * @dev Internal paint function, called by 'paint'.
      *
      * Update the pixel information and pay the previous author when the pixel is already painted (position > 0).
      * Otherwise, create the new pixel.
-     * Emits an event when a pixel is painted which is useful for frontend applications to know they should re-render that specific pixel.
      * Returns the spent funds.
      */
-    function paint(
+    function paintPixel(
         uint16 x,
         uint16 y,
         bytes3 color,
@@ -92,29 +68,28 @@ contract Painting is ReentrancyGuard, Ownable {
     ) internal returns (uint256) {
         require(x < 1000 && y < 1000, "Coordinates out of range");
 
-        uint256 position = pixelPosition(x, y);
+        uint256 position = positions[id(x, y)];
 
         if (position > 0) {
             uint256 index = position - 1;
-            uint256 price = pixelPrice(pixels[index].timesPainted);
-            address payable previousAuthor = pixels[index].author;
+            uint256 expense = price(pixels[index].timesPainted);
+            address previousAuthor = pixels[index].author;
 
-            require(funds >= price && funds - price >= 0, "Not enough funds");
+            require(
+                funds >= expense && funds - expense >= 0,
+                "Not enough funds"
+            );
 
             pixels[index].color = color;
-            pixels[index].author = payable(msg.sender);
+            pixels[index].author = msg.sender;
             pixels[index].timesPainted += 1;
 
-            previousAuthor.transfer(authorCut(price));
+            payable(previousAuthor).transfer((expense * 3) / 4);
 
-            emit PixelPainted(x, y);
-
-            return price;
+            return expense;
         } else {
-            pixelPositions[pixelId(x, y)] = pixels.length + 1;
-            pixels.push(PixelInformation(x, y, color, 1, payable(msg.sender)));
-
-            emit PixelPainted(x, y);
+            pixels.push(Details(x, y, color, 1, msg.sender));
+            positions[id(x, y)] = pixels.length;
 
             return 0;
         }
@@ -126,15 +101,11 @@ contract Painting is ReentrancyGuard, Ownable {
      * It goes through the 'pixelsToPaint' array and tries to paint them with the received value.
      * Reverts if there's not enough funds to cover the expense.
      */
-    function paintPixels(Pixel[] memory pixelsToPaint)
-        public
-        payable
-        nonReentrant
-    {
+    function paint(Pixel[] memory pixelsToPaint) public payable nonReentrant {
         uint256 funds = msg.value;
 
         for (uint256 i = 0; i < pixelsToPaint.length; i++) {
-            uint256 expendedFunds = paint(
+            uint256 expendedFunds = paintPixel(
                 pixelsToPaint[i].x,
                 pixelsToPaint[i].y,
                 pixelsToPaint[i].color,
@@ -142,24 +113,26 @@ contract Painting is ReentrancyGuard, Ownable {
             );
 
             funds -= expendedFunds;
+
+            emit PixelPainted(pixelsToPaint[i].x, pixelsToPaint[i].y);
         }
     }
 
     /**
-     * @dev The listing function, it returns the current painting state as an array of `PixelInformation`.
+     * @dev The listing function, it returns a paginated list of pixels.
      *
-     * Contract function calls have a data size limit, for that reason, this function accepts a 'page' and 'pageSize'.
-     * Those arguments can be used (coupled with 'pixelsCount') to get the painting data in digestible chunks.
+     * The full list of pixels can contain large amounts of data.
+     * We resolve that by having a pagination mechanism to receive the data as digestible chunks.
      */
-    function pixelsInfo(uint256 page, uint256 pageSize)
+    function list(uint256 page, uint256 pageSize)
         public
         view
         virtual
-        returns (PixelInformation[] memory)
+        returns (Details[] memory)
     {
         require(page > 0, "Page must be higher than 0");
 
-        PixelInformation[] memory result = new PixelInformation[](pageSize);
+        Details[] memory result = new Details[](pageSize);
         uint256 pixelIndex = (page - 1) * pageSize;
 
         for (uint256 i = 0; i < pageSize; i++) {
@@ -174,7 +147,20 @@ contract Painting is ReentrancyGuard, Ownable {
         return result;
     }
 
-    function pixelsCount() public view virtual returns (uint256) {
+    function pixel(uint16 x, uint16 y)
+        public
+        view
+        virtual
+        returns (Details memory)
+    {
+        uint256 position = positions[id(x, y)];
+
+        require(position > 0, "Pixel does not exist");
+
+        return pixels[position - 1];
+    }
+
+    function length() public view virtual returns (uint256) {
         return pixels.length;
     }
 

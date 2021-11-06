@@ -25,9 +25,6 @@ export default function Help() {
             This is an interactive painting. It is a square which measures
             1000x1000 pixels. Every pixel can be painted, selecting a specific
             color.{" "}
-          </DialogContentText>{" "}
-          <DialogContentText>
-            If you're a reddit fan, this is a cousin of /R/place for web 3.0.
           </DialogContentText>
           <DialogContentText>
             The painting is stored and distributed by the{" "}

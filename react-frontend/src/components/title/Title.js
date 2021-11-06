@@ -3,23 +3,50 @@ import { keyframes, css } from "@emotion/react";
 import { useRef, useState } from "react";
 
 const marquiesh = keyframes`
- 0% {
-    transform: scaleX(1) translate(-50%, -50%) rotate(225deg);
+  3% {
+    transform: scaleY(1.3) rotate(-180deg);
   }
 
-  98% {
-    transform: scaleX(0.1) translate(-50%, -50%) rotate(225deg);
-    color: orangered;
+  6% {
+    transform: scaleX(1.3) rotate(-180deg) translateX(30%);
   }
 
-  99% {
-    transform: scaleX(10) translate(-50%, -50%) rotate(225deg);
+  9% {
+    transform: scaleY(1.3) rotate(-180deg);
+  }
+
+  11% {
+    transform: scale(1.3) rotate(-180deg) translateX(30%);
+  }
+
+  16% {
+    transform: scale(1.3) rotate(-180deg) translateX(10%);
+    color: black;
+  }
+
+  30% {
+    transform: scale(2.3) rotate(-180deg) translateX(15%);
     color: red;
   }
 
+  60% {
+    transform: scale(3.3) rotate(-180deg) translateX(20%);
+    color: blue;
+  }
+
+  90% {
+    transform: scale(4.3) rotate(-180deg) translateX(15%);
+    color: yellow;
+  }
+
+  98% {
+    transform: scale(10) rotate(-180deg) translateX(10%);
+    color: white;
+  }
+
   100% {
-    transform: scaleX(10) translate(-50%, -50%) rotate(225deg);
-    color: black;
+    transform: scale(1) rotate(-180deg);
+    color: lightblue;
   }
 `;
 
@@ -33,18 +60,13 @@ const H1 = styled.h1`
   font-family: "Perfect DOS VGA";
   margin: 0;
   cursor: url("play.png"), pointer;
-  transition: ease-in font-size 150ms;
   writing-mode: tb-rl;
   transform: rotate(-180deg);
+  transition: transform 300ms ease;
 
   ${({ animate }) =>
     animate &&
     css`
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      font-size: 62rem;
-      transform: translate(-50%, -50%) rotate(225deg);
       animation: ${marquiesh} 82s ease 10ms forwards;
       cursor: url("stop.png"), pointer;
     `}

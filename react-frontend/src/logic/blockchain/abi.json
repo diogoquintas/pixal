@@ -39,6 +39,70 @@
   },
   {
     "inputs": [],
+    "name": "length",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "page",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "pageSize",
+        "type": "uint256"
+      }
+    ],
+    "name": "list",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "x",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint16",
+            "name": "y",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bytes3",
+            "name": "color",
+            "type": "bytes3"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timesPainted",
+            "type": "uint256"
+          },
+          {
+            "internalType": "address",
+            "name": "author",
+            "type": "address"
+          }
+        ],
+        "internalType": "struct Details[]",
+        "name": "",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "owner",
     "outputs": [
       {
@@ -75,7 +139,7 @@
         "type": "tuple[]"
       }
     ],
-    "name": "paintPixels",
+    "name": "paint",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
@@ -93,7 +157,7 @@
         "type": "uint16"
       }
     ],
-    "name": "pixelInfo",
+    "name": "pixel",
     "outputs": [
       {
         "components": [
@@ -118,78 +182,14 @@
             "type": "uint256"
           },
           {
-            "internalType": "address payable",
+            "internalType": "address",
             "name": "author",
             "type": "address"
           }
         ],
-        "internalType": "struct PixelInformation",
+        "internalType": "struct Details",
         "name": "",
         "type": "tuple"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "pixelsCount",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "page",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "pageSize",
-        "type": "uint256"
-      }
-    ],
-    "name": "pixelsInfo",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "uint16",
-            "name": "x",
-            "type": "uint16"
-          },
-          {
-            "internalType": "uint16",
-            "name": "y",
-            "type": "uint16"
-          },
-          {
-            "internalType": "bytes3",
-            "name": "color",
-            "type": "bytes3"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timesPainted",
-            "type": "uint256"
-          },
-          {
-            "internalType": "address payable",
-            "name": "author",
-            "type": "address"
-          }
-        ],
-        "internalType": "struct PixelInformation[]",
-        "name": "",
-        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",

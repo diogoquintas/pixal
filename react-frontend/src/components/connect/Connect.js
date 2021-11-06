@@ -62,7 +62,7 @@ export default function Connect({
       }
 
       window.web3 = new Web3(provider);
-      loadChainInfo();
+      await loadChainInfo();
       setOnViewOnly(false);
     } catch {
       setShowWalletModal(true);
@@ -82,7 +82,7 @@ export default function Connect({
       );
 
       window.web3 = new Web3(provider);
-      loadChainInfo();
+      await loadChainInfo();
       setOnViewOnly(true);
     } catch {
       setShowWalletModal(true);
@@ -151,6 +151,8 @@ export default function Connect({
 
     try {
       await loadContract();
+
+      window.contract.events.PixelPainted(undefined, updateChainPixel);
     } catch (err) {
       setConnecting(false);
       setConnectingAsViewer(false);
@@ -184,11 +186,6 @@ export default function Connect({
       setConnectingAsViewer(false);
       return;
     }
-
-    window.contract.events.PixelPainted(undefined, updateChainPixel);
-
-    setConnecting(false);
-    setConnectingAsViewer(false);
   };
 
   return (

@@ -43,11 +43,9 @@ export default function paint({ pixelList, setAlert }) {
     ),
   });
 
-  console.log(batches);
-
   return Promise.all(
     batches.map((batch) =>
-      window.contract.methods.paintPixels(batch.pixels).send({
+      window.contract.methods.paint(batch.pixels).send({
         from: window.account,
         value: batch.value.toString(),
       })

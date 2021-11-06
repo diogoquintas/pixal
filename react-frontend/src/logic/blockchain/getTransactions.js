@@ -17,7 +17,7 @@ export default async function getTransactions(options) {
   let gas = 0;
 
   try {
-    gas = await window.contract.methods.paintPixels(target).estimateGas({
+    gas = await window.contract.methods.paint(target).estimateGas({
       value,
       from: window.account,
     });

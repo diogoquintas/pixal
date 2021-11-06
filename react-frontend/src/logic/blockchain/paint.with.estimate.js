@@ -40,7 +40,7 @@ export default async function paint({ pixelList, setAlert }) {
 
   return Promise.all(
     transactions.map((transaction) =>
-      window.contract.methods.paintPixels(transaction.pixels).send({
+      window.contract.methods.paint(transaction.pixels).send({
         from: window.account,
         value: transaction.value.toString(),
         gas: transaction.gas,

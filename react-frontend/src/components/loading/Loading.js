@@ -9,8 +9,10 @@ const P = styled.p`
 `;
 
 export default function Loading({ onMount }) {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(onMount, []);
+  useEffect(() => {
+    requestAnimationFrame(onMount);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <P>
