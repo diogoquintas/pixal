@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 struct Pixel {
     uint16 x;
@@ -24,7 +25,7 @@ struct Details {
  *  The first time a pixel is painted is free but to re-paint a pixel
  *  it is required to pay the respective `price`.
  */
-contract Painting is ReentrancyGuard {
+contract Painting is Initializable, ReentrancyGuardUpgradeable {
     address private owner;
     uint256 constant basePrice = 0.00001 ether;
 
@@ -36,7 +37,7 @@ contract Painting is ReentrancyGuard {
 
     event PixelPainted(uint16 x, uint16 y);
 
-    constructor() {
+    function initialize() public initializer {
         owner = msg.sender;
     }
 
