@@ -2,6 +2,7 @@ import { ErrorPre } from "../../App.styles";
 import loadAccount from "../../logic/blockchain/loadAccount";
 import paint from "../../logic/blockchain/paint";
 import { Control } from "../pixel-list/PixelList.styles";
+import { useEffect } from "react";
 
 export default function PaintButton({
   transacting,
@@ -11,6 +12,18 @@ export default function PaintButton({
   onViewOnly,
   ...remainingProps
 }) {
+  useEffect(() => {
+    if (transacting && pixelList.length === 0) {
+      setTransacting(false);
+
+      setAlert({
+        msg: ">_congratulations! your pixels are now saved in the blockchain 🍿",
+        severity: "success",
+        dismissibleTime: 3000,
+      });
+    }
+  }, [transacting, pixelList, setTransacting, setAlert]);
+
   return (
     <Control
       variant="contained"
@@ -22,14 +35,6 @@ export default function PaintButton({
         try {
           await loadAccount();
           await paint({ pixelList, setAlert });
-
-          setTransacting(false);
-
-          setAlert({
-            msg: ">_congratulations! your pixels are now saved in the blockchain 🥳",
-            severity: "success",
-            dismissibleTime: 3000,
-          });
         } catch (err) {
           setAlert({
             msg: (
@@ -47,7 +52,7 @@ export default function PaintButton({
       }}
       {...remainingProps}
     >
-      {transacting ? "Painting" : "Paint"}
+      {transacting ? "Processing transaction..." : "Paint"}
     </Control>
   );
 }

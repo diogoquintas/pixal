@@ -150,23 +150,33 @@ export default function PixelList({
     };
   }, [pixelList]);
 
+  useEffect(() => {
+    if (transacting && open) {
+      setOpen(false);
+    }
+  }, [transacting, open]);
+
   if (pixelList?.length === 0) return null;
 
   return (
     <>
       <ControlsWrapper>
-        <Control
-          variant="contained"
-          aria-label={`${open ? "Close" : "Open"} pixels settings`}
-          title={`${open ? "Close" : "Open"} pixels settings`}
-          onClick={() => setOpen(!open)}
-        >
-          <span>{pixelList.length}</span>
-          {open ? <Minus /> : <Plus />}
-        </Control>
-        <Control variant="text" onClick={deleteAll}>
-          Clear all
-        </Control>
+        {!transacting && (
+          <>
+            <Control
+              variant="contained"
+              aria-label={`${open ? "Close" : "Open"} pixels settings`}
+              title={`${open ? "Close" : "Open"} pixels settings`}
+              onClick={() => setOpen(!open)}
+            >
+              <span>{pixelList.length}</span>
+              {open ? <Minus /> : <Plus />}
+            </Control>
+            <Control variant="text" onClick={deleteAll}>
+              Clear all
+            </Control>
+          </>
+        )}
         <PaintButton
           pixelList={pixelList}
           transacting={transacting}

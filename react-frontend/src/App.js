@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { storageGetPixels, storageUpdatePixels } from "./logic/storage/pixels";
 import Canvas from "./components/canvas/Canvas";
 import Loading from "./components/loading/Loading";
@@ -400,30 +400,43 @@ function App() {
     updateImageWhenPossible();
   };
 
+  const tryUpdateChainPixel = async (coordinates) => {
+    const pixelDetails = await getPixel(coordinates.x, coordinates.y);
+
+    const pixelInfo = parsePixel(pixelDetails);
+    const { id, x, y, author } = pixelInfo;
+
+    const isFromAccount = author === window.account;
+
+    chainPixels.current[id] = pixelInfo;
+    chainPixelsToUpdate.current[id] = pixelInfo;
+
+    revertPixel({ x, y, removeFromList: isFromAccount });
+
+    if (!isFromAccount) {
+      pixelToAlert.current = pixelInfo;
+    }
+
+    updateChainPixelsWhenPossible();
+  };
+
   const updateChainPixel = async (_, update) => {
     const coordinates = update?.returnValues ?? {};
 
     if (!coordinates) return;
 
-    try {
-      const pixelDetails = await getPixel(coordinates.x, coordinates.y);
+    let tries = 1;
+    const maxTries = 3;
 
-      const pixelInfo = parsePixel(pixelDetails);
-      const { id, x, y, author } = pixelInfo;
+    while (tries <= maxTries) {
+      try {
+        await tryUpdateChainPixel(coordinates);
 
-      const isFromAccount = author === window.account;
-
-      chainPixels.current[id] = pixelInfo;
-      chainPixelsToUpdate.current[id] = pixelInfo;
-
-      revertPixel({ x, y, removeFromList: isFromAccount });
-
-      if (!isFromAccount) {
-        pixelToAlert.current = pixelInfo;
+        break;
+      } catch {
+        tries++;
       }
-
-      updateChainPixelsWhenPossible();
-    } catch {}
+    }
   };
 
   const getPixelCoordinates = (offsetX = 0, offsetY = 0) => {
@@ -510,7 +523,7 @@ function App() {
     updateImageWhenPossible();
   };
 
-  const setAlert = (alertValue) => {
+  const setAlert = useCallback((alertValue) => {
     if (alertTimeout.current) {
       clearTimeout(alertTimeout.current);
     }
@@ -525,7 +538,7 @@ function App() {
     }
 
     initialSetAlert(alertValue);
-  };
+  }, []);
 
   const getSearchQuery = () => {
     let search = window.location.search;
