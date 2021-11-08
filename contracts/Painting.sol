@@ -12,8 +12,8 @@ struct Pixel {
 struct Details {
     uint16 x;
     uint16 y;
+    uint200 timesPainted;
     bytes3 color;
-    uint256 timesPainted;
     address author;
 }
 
@@ -72,7 +72,8 @@ contract Painting is ReentrancyGuard {
     ) internal returns (uint256) {
         require(x < 1000 && y < 1000, "Coordinates out of range");
 
-        uint256 position = positions[id(x, y)];
+        bytes memory pixelId = id(x, y);
+        uint256 position = positions[pixelId];
 
         if (position > 0) {
             uint256 index = position - 1;
@@ -84,16 +85,16 @@ contract Painting is ReentrancyGuard {
                 "Not enough funds"
             );
 
+            pixels[index].timesPainted += 1;
             pixels[index].color = color;
             pixels[index].author = msg.sender;
-            pixels[index].timesPainted += 1;
 
             payable(previousAuthor).transfer((expense * 3) / 4);
 
             return expense;
         } else {
-            pixels.push(Details(x, y, color, 1, msg.sender));
-            positions[id(x, y)] = pixels.length;
+            pixels.push(Details(x, y, 1, color, msg.sender));
+            positions[pixelId] = pixels.length;
 
             return 0;
         }

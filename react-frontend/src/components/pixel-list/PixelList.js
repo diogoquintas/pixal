@@ -156,6 +156,18 @@ export default function PixelList({
     }
   }, [transacting, open]);
 
+  useEffect(() => {
+    if (transacting && pixelList.length === 0) {
+      setAlert({
+        msg: ">_congratulations! your pixels are now saved in the blockchain 🍿",
+        severity: "success",
+        dismissibleTime: 3000,
+      });
+
+      setTransacting(false);
+    }
+  }, [transacting, pixelList, setTransacting, setAlert]);
+
   if (pixelList?.length === 0) return null;
 
   return (

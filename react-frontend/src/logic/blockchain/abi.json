@@ -1,22 +1,8 @@
 [
   {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "previousOwner",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "OwnershipTransferred",
-    "type": "event"
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
     "anonymous": false,
@@ -78,14 +64,14 @@
             "type": "uint16"
           },
           {
+            "internalType": "uint200",
+            "name": "timesPainted",
+            "type": "uint200"
+          },
+          {
             "internalType": "bytes3",
             "name": "color",
             "type": "bytes3"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timesPainted",
-            "type": "uint256"
           },
           {
             "internalType": "address",
@@ -96,19 +82,6 @@
         "internalType": "struct Details[]",
         "name": "",
         "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -172,14 +145,14 @@
             "type": "uint16"
           },
           {
+            "internalType": "uint200",
+            "name": "timesPainted",
+            "type": "uint200"
+          },
+          {
             "internalType": "bytes3",
             "name": "color",
             "type": "bytes3"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timesPainted",
-            "type": "uint256"
           },
           {
             "internalType": "address",
@@ -193,26 +166,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "renounceOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "newOwner",
-        "type": "address"
-      }
-    ],
-    "name": "transferOwnership",
-    "outputs": [],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

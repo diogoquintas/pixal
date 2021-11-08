@@ -27,7 +27,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
-const FPS = 35;
+const FPS = 30;
 const ZOOM_STRENGTH = 0.5;
 
 export const insideInterval = (coordinate) =>
@@ -406,7 +406,8 @@ function App() {
     const pixelInfo = parsePixel(pixelDetails);
     const { id, x, y, author } = pixelInfo;
 
-    const isFromAccount = author === window.account;
+    const isFromAccount =
+      window.account && author.toLowerCase() === window.account.toLowerCase();
 
     chainPixels.current[id] = pixelInfo;
     chainPixelsToUpdate.current[id] = pixelInfo;
