@@ -2,7 +2,6 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 struct Pixel {
     uint16 x;
@@ -25,7 +24,8 @@ struct Details {
  *  The first time a pixel is painted is free but to re-paint a pixel
  *  it is required to pay the respective `price`.
  */
-contract Painting is ReentrancyGuard, Ownable {
+contract Painting is ReentrancyGuard {
+    address private owner;
     uint256 constant basePrice = 0.00001 ether;
 
     Details[] pixels;
@@ -35,6 +35,10 @@ contract Painting is ReentrancyGuard, Ownable {
     mapping(bytes => uint256) positions;
 
     event PixelPainted(uint16 x, uint16 y);
+
+    constructor() {
+        owner = msg.sender;
+    }
 
     function id(uint16 x, uint16 y)
         internal
@@ -164,8 +168,10 @@ contract Painting is ReentrancyGuard, Ownable {
         return pixels.length;
     }
 
-    function withdraw(uint256 funds) external onlyOwner {
-        payable(owner()).transfer(funds);
+    function withdraw(uint256 funds) external {
+        require(msg.sender == owner);
+
+        payable(owner).transfer(funds);
     }
 
     receive() external payable {}
