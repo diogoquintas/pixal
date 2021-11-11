@@ -72,6 +72,13 @@ const H1 = styled.h1`
     `}
 `;
 
+const BetaTag = styled.span`
+  position: fixed;
+  top: 0;
+  right: 0;
+  color: var(--secondary-color);
+`;
+
 export default function Title({ title }) {
   const [start, setStart] = useState(false);
 
@@ -102,6 +109,7 @@ export default function Title({ title }) {
       >
         {`${title}`}
       </H1>
+      <BetaTag>version 0.1</BetaTag>
       <audio ref={audioRef} src="/intro.mp3"></audio>
     </>
   );

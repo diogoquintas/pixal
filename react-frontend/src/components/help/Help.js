@@ -15,10 +15,13 @@ export default function Help() {
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
+          <DialogTitle>Experimental version</DialogTitle>
           <DialogContentText>
-            We're working out some compatibility issues across devices and
-            browsers. For now, we recommend the use of desktop browser
-            Chrome/Brave with the Metamask extension.
+            This interface is currently on an early experimental version. We're
+            working out some compatibility issues across devices and browsers as
+            well as different wallets. For now, we recommend you to access the
+            application in a desktop using Chrome/Brave with the Metamask
+            extension.
           </DialogContentText>
           <DialogTitle>What is this?</DialogTitle>
           <DialogContentText>
