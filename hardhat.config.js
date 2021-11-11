@@ -2,6 +2,8 @@ require("@nomiclabs/hardhat-waffle");
 require("@openzeppelin/hardhat-upgrades");
 require("hardhat-gas-reporter");
 
+const accounts = require("./accounts.json");
+
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
 task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
@@ -32,9 +34,12 @@ module.exports = {
     arbTestnet: {
       url: "https://rinkeby.arbitrum.io/rpc",
       chainId: 421611,
-      accounts: [
-        "8196e67be337ae7fc204867486c194caca98ff62c4edd41ae73e4c8595554ccd",
-      ],
+      accounts: accounts,
+    },
+    arbitrum: {
+      url: "https://arb1.arbitrum.io/rpc",
+      chainId: 42161,
+      accounts: accounts,
     },
   },
   gasReporter: {

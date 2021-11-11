@@ -108,7 +108,7 @@
           }
         ],
         "internalType": "struct Pixel[]",
-        "name": "pixelsToPaint",
+        "name": "_pixels",
         "type": "tuple[]"
       }
     ],

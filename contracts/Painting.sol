@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 struct Pixel {
     uint16 x;
@@ -25,7 +24,7 @@ struct Details {
  *  The first time a pixel is painted is free but to re-paint a pixel
  *  it is required to pay the respective `price`.
  */
-contract Painting is Initializable, ReentrancyGuardUpgradeable {
+contract Painting is ReentrancyGuard {
     address private owner;
     uint256 constant basePrice = 0.00001 ether;
 
@@ -37,7 +36,7 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
 
     event PixelPainted(uint16 x, uint16 y);
 
-    function initialize() public initializer {
+    constructor() {
         owner = msg.sender;
     }
 
@@ -52,7 +51,7 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
 
     function price(uint256 timesPainted) internal pure returns (uint256) {
         if (timesPainted >= 11) {
-            return basePrice * 10**11;
+            return 1000000 ether;
         }
 
         return basePrice * 10**timesPainted;
@@ -86,7 +85,7 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
                 "Not enough funds"
             );
 
-            pixels[index].timesPainted += 1;
+            pixels[index].timesPainted++;
             pixels[index].color = color;
             pixels[index].author = msg.sender;
 
@@ -104,23 +103,23 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
     /**
      * @dev The painting function.
      *
-     * It goes through the 'pixelsToPaint' array and tries to paint them with the received value.
+     * It goes through the '_pixels' array and tries to paint them with the received value.
      * Reverts if there's not enough funds to cover the expense.
      */
-    function paint(Pixel[] memory pixelsToPaint) public payable nonReentrant {
+    function paint(Pixel[] memory _pixels) public payable nonReentrant {
         uint256 funds = msg.value;
 
-        for (uint256 i = 0; i < pixelsToPaint.length; i++) {
-            uint256 expendedFunds = paintPixel(
-                pixelsToPaint[i].x,
-                pixelsToPaint[i].y,
-                pixelsToPaint[i].color,
+        for (uint256 i = 0; i < _pixels.length; i++) {
+            uint256 expense = paintPixel(
+                _pixels[i].x,
+                _pixels[i].y,
+                _pixels[i].color,
                 funds
             );
 
-            funds -= expendedFunds;
+            funds -= expense;
 
-            emit PixelPainted(pixelsToPaint[i].x, pixelsToPaint[i].y);
+            emit PixelPainted(_pixels[i].x, _pixels[i].y);
         }
     }
 
@@ -128,7 +127,7 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
      * @dev The listing function, it returns a paginated list of pixels.
      *
      * The full list of pixels can contain large amounts of data.
-     * We resolve that by having a pagination mechanism to receive the data as digestible chunks.
+     * As a workaround, the function accepts a 'pageSize' argument to limit the data output.
      */
     function list(uint256 page, uint256 pageSize)
         public
@@ -139,12 +138,12 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
         require(page > 0, "Page must be higher than 0");
 
         Details[] memory result = new Details[](pageSize);
-        uint256 pixelIndex = (page - 1) * pageSize;
+        uint256 index = (page - 1) * pageSize;
 
         for (uint256 i = 0; i < pageSize; i++) {
-            if (pixels.length > pixelIndex) {
-                result[i] = pixels[pixelIndex];
-                pixelIndex++;
+            if (pixels.length > index) {
+                result[i] = pixels[index];
+                index++;
             } else {
                 return result;
             }
@@ -159,11 +158,7 @@ contract Painting is Initializable, ReentrancyGuardUpgradeable {
         virtual
         returns (Details memory)
     {
-        uint256 position = positions[id(x, y)];
-
-        require(position > 0, "Pixel does not exist");
-
-        return pixels[position - 1];
+        return pixels[positions[id(x, y)] - 1];
     }
 
     function length() public view virtual returns (uint256) {
