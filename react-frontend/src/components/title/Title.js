@@ -74,9 +74,10 @@ const H1 = styled.h1`
 
 const BetaTag = styled.span`
   position: fixed;
-  top: 0;
+  bottom: 0;
   right: 0;
   color: var(--secondary-color);
+  font-size: 12px;
 `;
 
 export default function Title({ title }) {

@@ -30,3 +30,24 @@ export const ErrorPre = styled.pre`
 
   ${hideScrollbar}
 `;
+
+export const Loading = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.5rem;
+  background-color: var(--main-color);
+  z-index: 100;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: ${({ progress }) => progress}%;
+    background-color: var(--secondary-color);
+    transition: width 300ms ease;
+  }
+`;

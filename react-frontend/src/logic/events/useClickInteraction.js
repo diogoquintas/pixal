@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { MODE } from "../../App";
 
 export default function useClickInteraction({
-  transacting,
+  intersactionDisabled,
   interact,
   canvasRef,
   currentMode,
@@ -20,7 +20,7 @@ export default function useClickInteraction({
     function handleMouseDown(event) {
       const isMove = currentMode.current === MODE.move;
 
-      if (transacting && !isMove) return;
+      if (intersactionDisabled && !isMove) return;
 
       if (isMove) {
         previousPosition.current = {
@@ -74,5 +74,5 @@ export default function useClickInteraction({
       canvas.removeEventListener("mouseup", handleMouseUp);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [disabled, transacting]);
+  }, [disabled, intersactionDisabled]);
 }

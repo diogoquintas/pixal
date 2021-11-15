@@ -1,6 +1,5 @@
 import { useState } from "react";
 import Web3 from "web3";
-import getPixels from "../../logic/blockchain/getPixels";
 import loadAccount from "../../logic/blockchain/loadAccount";
 import loadContract from "../../logic/blockchain/loadContract";
 import Button from "@mui/material/Button";
@@ -27,7 +26,7 @@ export const CHAIN_PARAMS = {
 
 export default function Connect({
   setAlert,
-  setPixelsToLoad,
+  setConnected,
   updateChainPixel,
   setOnViewOnly,
 }) {
@@ -154,31 +153,12 @@ export default function Connect({
 
       window.contract.events.PixelPainted(undefined, updateChainPixel);
     } catch (err) {
-      setConnecting(false);
-      setConnectingAsViewer(false);
-      return;
-    }
-
-    try {
-      const pixels = await getPixels();
-
-      setPixelsToLoad(pixels ?? []);
-    } catch (err) {
       setErrorAlert({
         err,
         title: (
           <>
-            &gt;_There was an error reading the blockchain data, make sure
-            you're connected to the correct network. We're on Arbitrum, follow
-            this link to{" "}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href="https://arbitrum.io/bridge-tutorial/"
-            >
-              connect to the chain
-            </a>
-            .
+            &gt;_There was an error connecting to your account, make sure you
+            have an account selected
           </>
         ),
       });
@@ -186,6 +166,8 @@ export default function Connect({
       setConnectingAsViewer(false);
       return;
     }
+
+    setConnected(true);
   };
 
   return (

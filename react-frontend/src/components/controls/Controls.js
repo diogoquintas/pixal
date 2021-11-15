@@ -8,7 +8,7 @@ import SizePicker from "../size-picker/SizePicker";
 import { Control, Wrapper, Pickers } from "./Controls.styles";
 import HelpDialog from "./HelpDialog";
 
-export default function Controls({ mode, setMode, color, size }) {
+export default function Controls({ mode, setMode, color, size, loading }) {
   const [openHelp, setOpenHelp] = useState(false);
 
   const isDelete = mode === MODE.delete;
@@ -19,8 +19,8 @@ export default function Controls({ mode, setMode, color, size }) {
     <Wrapper>
       {(isPaint || isDelete) && (
         <Pickers>
-          <SizePicker size={size} />
-          {isPaint && <ColorPicker color={color} />}
+          <SizePicker disabled={loading} size={size} />
+          {isPaint && <ColorPicker disabled={loading} color={color} />}
         </Pickers>
       )}
       <div>
@@ -45,6 +45,7 @@ export default function Controls({ mode, setMode, color, size }) {
           variant={isDelete ? "contained" : "outlined"}
           aria-label="Set to delete"
           title="Set to delete"
+          disabled={loading}
         >
           <Eraser />
         </Control>
@@ -53,6 +54,7 @@ export default function Controls({ mode, setMode, color, size }) {
           variant={isPaint ? "contained" : "outlined"}
           aria-label="Set to paint"
           title="Set to paint"
+          disabled={loading}
         >
           <Pencil />
         </Control>

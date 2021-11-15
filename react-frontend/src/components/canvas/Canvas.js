@@ -22,10 +22,16 @@ const StyledCanvas = styled.canvas`
       cursor: cell;
     `}
 
-  ${({ transacting }) =>
-    transacting &&
+  ${({ disabled }) =>
+    disabled &&
     css`
       cursor: not-allowed;
+    `}
+
+    ${({ loading }) =>
+    loading &&
+    css`
+      cursor: progress;
     `}
 `;
 
@@ -44,6 +50,7 @@ const Canvas = forwardRef(
       mode,
       canvasReady,
       updateMarker,
+      loading,
     },
     ref
   ) => {
@@ -93,7 +100,7 @@ const Canvas = forwardRef(
     });
     useClickInteraction({
       canvasRef,
-      transacting,
+      intersactionDisabled: transacting || loading,
       interact,
       currentMode,
       updatePosition,
@@ -108,16 +115,19 @@ const Canvas = forwardRef(
     });
 
     return (
-      <StyledCanvas
-        ref={(elementRef) => {
-          ref.current = elementRef;
-          canvasRef.current = elementRef;
-        }}
-        isMove={mode === MODE.move}
-        transacting={transacting}
-      >
-        Browser does not support canvas{" "}
-      </StyledCanvas>
+      <>
+        <StyledCanvas
+          ref={(elementRef) => {
+            ref.current = elementRef;
+            canvasRef.current = elementRef;
+          }}
+          isMove={mode === MODE.move}
+          disabled={transacting}
+          loading={loading}
+        >
+          Browser does not support canvas{" "}
+        </StyledCanvas>
+      </>
     );
   }
 );

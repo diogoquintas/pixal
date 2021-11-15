@@ -26,7 +26,7 @@ export default function Help() {
           <DialogTitle>What is this?</DialogTitle>
           <DialogContentText>
             This is an interactive painting. It is a square which measures
-            1000x1000 pixels. Every pixel can be painted, selecting a specific
+            400x400 pixels. Every pixel can be painted, selecting a specific
             color.{" "}
           </DialogContentText>
           <DialogContentText>

@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import { useState } from "react";
+import { css } from "@emotion/react";
 
 const Wrapper = styled.div`
   height: 36px;
@@ -10,6 +11,12 @@ const Wrapper = styled.div`
     0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
   border: 1px solid var(--main-color);
   box-sizing: border-box;
+
+  ${({ isDisabled }) =>
+    isDisabled &&
+    css`
+      cursor: not-allowed;
+    `}
 `;
 
 const Picker = styled.input`
@@ -19,11 +26,11 @@ const Picker = styled.input`
   cursor: pointer;
 `;
 
-export default function ColorPicker({ color: colorRef }) {
+export default function ColorPicker({ color: colorRef, disabled }) {
   const [color, setColor] = useState(colorRef.current);
 
   return (
-    <Wrapper color={color}>
+    <Wrapper color={color} isDisabled={disabled}>
       <Picker
         id="colorPicker"
         type="color"
@@ -37,6 +44,7 @@ export default function ColorPicker({ color: colorRef }) {
         onBlur={() => {
           colorRef.current = color;
         }}
+        disabled={disabled}
       />
     </Wrapper>
   );

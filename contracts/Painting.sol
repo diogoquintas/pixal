@@ -20,7 +20,7 @@ struct Details {
 /**
  * @dev A two dimensional painting, each pixel can have a specific color.
  *
- *  The painting size is 1000x1000 pixels.
+ *  The painting size is 400x400 pixels.
  *  The first time a pixel is painted is free but to re-paint a pixel
  *  it is required to pay the respective `price`.
  */
@@ -28,11 +28,7 @@ contract Painting is ReentrancyGuard {
     address private owner;
     uint256 constant basePrice = 0.00001 ether;
 
-    Details[] pixels;
-
-    /// Mapping between a pixel coordinate and its corresponding position inside the pixel list.
-    /// Usefull to check if a pixel is painted.
-    mapping(bytes => uint256) positions;
+    mapping(bytes => Details) pixels;
 
     event PixelPainted(uint16 x, uint16 y);
 
@@ -40,7 +36,7 @@ contract Painting is ReentrancyGuard {
         owner = msg.sender;
     }
 
-    function id(uint16 x, uint16 y)
+    function id(uint256 x, uint256 y)
         internal
         view
         virtual
@@ -50,8 +46,10 @@ contract Painting is ReentrancyGuard {
     }
 
     function price(uint256 timesPainted) internal pure returns (uint256) {
-        if (timesPainted >= 11) {
-            return 1000000 ether;
+        if (timesPainted == 0) {
+            return 0;
+        } else if (timesPainted >= 11) {
+            return 100000 ether;
         }
 
         return basePrice * 10**timesPainted;
@@ -70,99 +68,88 @@ contract Painting is ReentrancyGuard {
         bytes3 color,
         uint256 funds
     ) internal returns (uint256) {
-        require(x < 1000 && y < 1000, "Coordinates out of range");
+        require(x < 400 && y < 400, "Coordinates out of range");
 
         bytes memory pixelId = id(x, y);
-        uint256 position = positions[pixelId];
+        Details memory pixel = pixels[pixelId];
 
-        if (position > 0) {
-            uint256 index = position - 1;
-            uint256 expense = price(pixels[index].timesPainted);
-            address previousAuthor = pixels[index].author;
+        emit PixelPainted(x, y);
+
+        if (pixel.timesPainted > 0) {
+            uint256 expense = price(pixel.timesPainted);
 
             require(
                 funds >= expense && funds - expense >= 0,
                 "Not enough funds"
             );
 
-            pixels[index].timesPainted++;
-            pixels[index].color = color;
-            pixels[index].author = msg.sender;
+            payable(pixel.author).transfer((expense * 3) / 4);
 
-            payable(previousAuthor).transfer((expense * 3) / 4);
+            pixel.timesPainted++;
+            pixel.color = color;
+            pixel.author = msg.sender;
+
+            pixels[pixelId] = pixel;
 
             return expense;
-        } else {
-            pixels.push(Details(x, y, 1, color, msg.sender));
-            positions[pixelId] = pixels.length;
-
-            return 0;
         }
+
+        pixels[pixelId] = Details(x, y, 1, color, msg.sender);
+
+        return 0;
     }
 
     /**
      * @dev The painting function.
      *
-     * It goes through the '_pixels' array and tries to paint them with the received value.
+     * It goes through the 'pixelsToPaint' array and tries to paint them with the received value.
      * Reverts if there's not enough funds to cover the expense.
      */
-    function paint(Pixel[] memory _pixels) public payable nonReentrant {
+    function paint(Pixel[] memory pixelsToPaint) public payable nonReentrant {
         uint256 funds = msg.value;
 
-        for (uint256 i = 0; i < _pixels.length; i++) {
-            uint256 expense = paintPixel(
-                _pixels[i].x,
-                _pixels[i].y,
-                _pixels[i].color,
+        for (uint256 i = 0; i < pixelsToPaint.length; i++) {
+            Pixel memory pixelToPaint = pixelsToPaint[i];
+
+            funds -= paintPixel(
+                pixelToPaint.x,
+                pixelToPaint.y,
+                pixelToPaint.color,
                 funds
             );
-
-            funds -= expense;
-
-            emit PixelPainted(_pixels[i].x, _pixels[i].y);
         }
     }
 
-    /**
-     * @dev The listing function, it returns a paginated list of pixels.
-     *
-     * The full list of pixels can contain large amounts of data.
-     * As a workaround, the function accepts a 'pageSize' argument to limit the data output.
-     */
-    function list(uint256 page, uint256 pageSize)
-        public
-        view
-        virtual
-        returns (Details[] memory)
-    {
-        require(page > 0, "Page must be higher than 0");
+    function list(
+        uint256 x0,
+        uint256 y0,
+        uint256 x1,
+        uint256 y1
+    ) public view virtual returns (Details[] memory) {
+        require(x1 > x0 && y1 > y0);
+        require(x0 >= 0 && y0 >= 0);
+        require(x1 <= 400 && y1 <= 400);
 
-        Details[] memory result = new Details[](pageSize);
-        uint256 index = (page - 1) * pageSize;
+        Details[] memory result = new Details[]((x1 - x0) * (y1 - y0));
+        uint256 index = 0;
 
-        for (uint256 i = 0; i < pageSize; i++) {
-            if (pixels.length > index) {
-                result[i] = pixels[index];
+        for (uint256 x = x0; x < x1; x++) {
+            for (uint256 y = y0; y < y1; y++) {
+                result[index] = pixels[id(x, y)];
                 index++;
-            } else {
-                return result;
             }
         }
 
         return result;
     }
 
-    function pixel(uint16 x, uint16 y)
+    function details(uint16 x, uint16 y)
         public
         view
         virtual
         returns (Details memory)
     {
-        return pixels[positions[id(x, y)] - 1];
-    }
-
-    function length() public view virtual returns (uint256) {
-        return pixels.length;
+        return pixels[id(x, y)];
     }
 
     function withdraw(uint256 funds) external {

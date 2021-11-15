@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { storageGetPixels, storageUpdatePixels } from "./logic/storage/pixels";
 import Canvas from "./components/canvas/Canvas";
-import Loading from "./components/loading/Loading";
-import { AlertWrapper } from "./App.styles";
+import { AlertWrapper, ErrorPre, Loading } from "./App.styles";
 import Alert from "@mui/material/Alert";
 import Title from "./components/title/Title";
 import useTimeout from "./logic/useTimeout";
@@ -16,8 +15,9 @@ import getIsValidColor from "./logic/isValidColor";
 import getIsMobileDevice from "./logic/isMobileDevice";
 import getName from "./logic/blockchain/getName";
 import getPixel from "./logic/blockchain/getPixel";
+import getPixels from "./logic/blockchain/getPixels";
 
-export const BOARD_SIZE = 1000;
+export const BOARD_SIZE = 400;
 export const MODE = {
   paint: "Paint",
   delete: "Delete",
@@ -27,6 +27,7 @@ export const MAIN_COLOR = "#ca98ff";
 export const SECONDARY_COLOR = "#0000ff";
 export const REFERENCE_PRICE = 10000000000000;
 
+const squareSize = Number(process.env.REACT_APP_LISTING_SQUARE_SIZE);
 const FPS = 30;
 const ZOOM_STRENGTH = 0.5;
 
@@ -34,17 +35,19 @@ export const insideInterval = (coordinate) =>
   coordinate >= 0 && coordinate < BOARD_SIZE;
 
 function App() {
-  const [pixelsLoaded, setPixelsLoaded] = useState(false);
   const [transacting, setTransacting] = useState(false);
-  const [mode, setMode] = useState(MODE.paint);
+  const [mode, setMode] = useState(MODE.move);
   const [alert, initialSetAlert] = useState();
   const [canvasReady, setCanvasReady] = useState(false);
   const [localPixels, setLocalPixels] = useState({});
-  const [pixelsToLoad, setPixelsToLoad] = useState();
   const [stateChainPixels, setStateChainPixels] = useState({});
   const [isMobileDevice] = useState(getIsMobileDevice);
   const [selected, setSelected] = useState();
   const [onViewOnly, setOnViewOnly] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+
+  const loading = loadingProgress !== 100;
 
   const map = useRef(document.createElement("canvas"));
   const mapCtx = useRef(map.current.getContext("2d"));
@@ -58,7 +61,7 @@ function App() {
   const color = useRef(SECONDARY_COLOR);
   const size = useRef(MIN_SIZE);
   const chainPixels = useRef({});
-  const currentMode = useRef(MODE.paint);
+  const currentMode = useRef(MODE.move);
   const markerRef = useRef();
   const alertTimeout = useRef();
   const chainPixelsToUpdate = useRef({});
@@ -66,6 +69,8 @@ function App() {
   const timeSinceLastDraw = useRef(0);
   const selectedCoordinates = useRef();
   const names = useRef({});
+  const pixelsToLoad = useRef([]);
+  const localPixelsRef = useRef({});
 
   const findName = async (address) => {
     names.current[address] = {
@@ -201,32 +206,89 @@ function App() {
         size.current * zoom - 2,
         size.current * zoom - 2
       );
-    } else if (currentMode.current === MODE.move) {
-      const targetX = selectedCoordinates.current?.x ?? x;
-      const targetY = selectedCoordinates.current?.y ?? y;
+    }
+    // } else if (currentMode.current === MODE.move) {
+    //   const targetX = selectedCoordinates.current?.x ?? x;
+    //   const targetY = selectedCoordinates.current?.y ?? y;
 
-      ctx.strokeStyle = "white";
-      ctx.strokeRect(
-        (targetX - xMin) * zoom,
-        (targetY - yMin) * zoom,
-        zoom,
-        zoom
-      );
-      ctx.strokeStyle = "black";
-      ctx.strokeRect(
-        (targetX - xMin) * zoom + 1,
-        (targetY - yMin) * zoom + 1,
-        zoom - 2,
-        zoom - 2
-      );
+    //   ctx.strokeStyle = "white";
+    //   ctx.strokeRect(
+    //     (targetX - xMin) * zoom,
+    //     (targetY - yMin) * zoom,
+    //     zoom,
+    //     zoom
+    //   );
+    //   ctx.strokeStyle = "black";
+    //   ctx.strokeRect(
+    //     (targetX - xMin) * zoom + 1,
+    //     (targetY - yMin) * zoom + 1,
+    //     zoom - 2,
+    //     zoom - 2
+    //   );
+    // }
+  };
+
+  const loadPixelsWhenPossible = useTimeout({
+    callback: () => {
+      if (pixelsToLoad.current.length > 0) {
+        const pixelsToDraw = pixelsToLoad.current.flat();
+
+        drawToMap(pixelsToDraw);
+        pixelsToLoad.current = [];
+
+        setLoadingProgress(
+          (progress) => progress + (pixelsToDraw.length * 100) / BOARD_SIZE ** 2
+        );
+      }
+    },
+  });
+
+  const loadChainPixels = async () => {
+    try {
+      for (let x0 = 0; x0 < BOARD_SIZE; x0 += squareSize) {
+        for (let y0 = 0; y0 < BOARD_SIZE; y0 += squareSize) {
+          getPixels(x0, y0, x0 + squareSize, y0 + squareSize).then(
+            (pixels) => {
+              pixelsToLoad.current.push(pixels);
+              loadPixelsWhenPossible();
+            },
+            (err) => {
+              throw new Error(err);
+            }
+          );
+        }
+      }
+    } catch (err) {
+      setAlert({
+        msg: (
+          <>
+            <p>detailed info:</p>
+            <ErrorPre>{err.message}</ErrorPre>
+          </>
+        ),
+        title: (
+          <>
+            &gt;_There was an error reading the blockchain data, make sure
+            you're connected to the correct network. We're on Arbitrum, follow
+            this link to{" "}
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href="https://arbitrum.io/bridge-tutorial/"
+            >
+              connect to the chain
+            </a>
+            .
+          </>
+        ),
+        severity: "error",
+      });
     }
   };
 
-  const drawMap = () => {
+  const drawToMap = (pixelsToLoad) => {
     const ctx = mapCtx.current;
     const nextChainPixels = {};
-
-    ctx.clearRect(0, 0, map.width, map.height);
 
     pixelsToLoad.forEach((pixel) => {
       if (pixel.timesPainted === "0") return;
@@ -236,39 +298,35 @@ function App() {
 
       nextChainPixels[id] = pixelInfo;
 
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, 1, 1);
+      if (!localPixelsRef.current[id]) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, 1, 1);
+      }
     });
 
-    chainPixels.current = nextChainPixels;
-    setStateChainPixels(nextChainPixels);
+    chainPixels.current = { ...chainPixels.current, ...nextChainPixels };
+    setStateChainPixels({ ...chainPixels.current, ...nextChainPixels });
+
+    imageRef.current.src = map.current.toDataURL();
   };
 
-  const firstDraw = () => {
-    drawMap();
-
+  const loadStoragePixels = () => {
     const canvas = map.current;
     const ctx = mapCtx.current;
 
     const storagePixels = storageGetPixels();
 
     if (storagePixels) {
-      requestAnimationFrame(() => {
-        Object.keys(storagePixels).forEach((id) => {
-          const [x, y] = id.split("-");
+      Object.keys(storagePixels).forEach((id) => {
+        const [x, y] = id.split("-");
 
-          ctx.fillStyle = storagePixels[id];
-          ctx.fillRect(x, y, 1, 1);
-        });
-
-        setLocalPixels(storagePixels);
-
-        setPixelsLoaded(true);
-        imageRef.current.src = canvas.toDataURL();
+        ctx.fillStyle = storagePixels[id];
+        ctx.fillRect(x, y, 1, 1);
       });
+
+      setLocalPixels(storagePixels);
     }
 
-    setPixelsLoaded(true);
     imageRef.current.src = canvas.toDataURL();
   };
 
@@ -604,16 +662,31 @@ function App() {
   useEffect(() => {
     if (canvasReady) {
       timeSinceLastDraw.current = performance.now();
+
       updatePositionFromLocation();
-      draw();
+
       document.body.classList.add("canvas-ready");
+
+      loadStoragePixels();
+      draw();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canvasReady]);
 
   useEffect(() => {
+    if (connected) {
+      loadChainPixels();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected]);
+
+  useEffect(() => {
     currentMode.current = mode;
   }, [mode]);
+
+  useEffect(() => {
+    localPixelsRef.current = localPixels;
+  }, [localPixels]);
 
   return (
     <>
@@ -629,25 +702,32 @@ function App() {
           </Alert>
         </AlertWrapper>
       )}
-      {pixelsToLoad ? (
-        pixelsLoaded ? (
-          <>
-            <Canvas
-              ref={canvasRef}
-              canvasCtx={canvasCtx}
-              position={position}
-              transacting={transacting}
-              interact={interact}
-              updateZoom={updateZoom}
-              updatePosition={updatePosition}
-              setCanvasReady={setCanvasReady}
-              currentMode={currentMode}
-              setMode={setMode}
-              mode={mode}
-              canvasReady={canvasReady}
-              updateMarker={updateMarker}
-            />
-            <Controls mode={mode} setMode={setMode} color={color} size={size} />
+      {connected ? (
+        <>
+          <Canvas
+            ref={canvasRef}
+            canvasCtx={canvasCtx}
+            position={position}
+            transacting={transacting}
+            interact={interact}
+            updateZoom={updateZoom}
+            updatePosition={updatePosition}
+            setCanvasReady={setCanvasReady}
+            currentMode={currentMode}
+            setMode={setMode}
+            mode={mode}
+            canvasReady={canvasReady}
+            updateMarker={updateMarker}
+            loading={loading}
+          />
+          <Controls
+            mode={mode}
+            setMode={setMode}
+            color={color}
+            size={size}
+            loading={loading}
+          />
+          {!loading && (
             <PixelList
               pixels={localPixels}
               revertPixel={revertPixel}
@@ -656,17 +736,17 @@ function App() {
               transacting={transacting}
               setAlert={setAlert}
               onViewOnly={onViewOnly}
+              loading={loading}
             />
-          </>
-        ) : (
-          <Loading onMount={firstDraw} />
-        )
+          )}
+          {loading && <Loading progress={loadingProgress} />}
+        </>
       ) : (
         <>
           <Title title={process.env.REACT_APP_NAME} />
           <Connect
             setAlert={setAlert}
-            setPixelsToLoad={setPixelsToLoad}
+            setConnected={setConnected}
             updateChainPixel={updateChainPixel}
             setOnViewOnly={setOnViewOnly}
           />
@@ -690,6 +770,7 @@ function App() {
         selected={selected}
         setSelected={setSelected}
         onViewOnly={onViewOnly}
+        loading={loading}
       />
     </>
   );

@@ -35,6 +35,7 @@ const MouseController = ({
   setAlert,
   selected,
   setSelected,
+  loading,
 }) => {
   const [mouseCoordinates, setMouseCoordinates] = useState();
   const coordinates = isMobileDevice ? selected : selected ?? mouseCoordinates;
@@ -104,6 +105,15 @@ const MouseController = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
+
+  if (loading && ready)
+    return (
+      <InfoWrapper>
+        <InfoBlock>
+          <p>SCANNING CHAIN FOR PIXELS</p>
+        </InfoBlock>
+      </InfoWrapper>
+    );
 
   if (!coordinates || !ready) return null;
 
@@ -300,6 +310,7 @@ const Map = forwardRef(
       setAlert,
       selected,
       setSelected,
+      loading,
     },
     ref
   ) => {
@@ -323,6 +334,7 @@ const Map = forwardRef(
           setAlert={setAlert}
           selected={selected}
           setSelected={setSelected}
+          loading={loading}
         />
         {isMobile && ready && (
           <MapButton variant="outlined" onClick={() => setMapOpen(!mapOpen)}>

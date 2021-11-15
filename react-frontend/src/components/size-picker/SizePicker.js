@@ -16,7 +16,7 @@ const Wrapper = styled.div`
   }
 `;
 
-export default function SizePicker({ size: sizeRef }) {
+export default function SizePicker({ size: sizeRef, disabled }) {
   const [size, setSize] = useState(sizeRef.current);
 
   useEffect(() => {
@@ -35,6 +35,7 @@ export default function SizePicker({ size: sizeRef }) {
         step={1}
         min={MIN_SIZE}
         max={MAX_SIZE}
+        disabled={disabled}
       />
     </Wrapper>
   );
