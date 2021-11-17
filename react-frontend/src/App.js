@@ -674,13 +674,6 @@ function App() {
   }, [canvasReady]);
 
   useEffect(() => {
-    if (connected) {
-      loadChainPixels();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected]);
-
-  useEffect(() => {
     currentMode.current = mode;
   }, [mode]);
 
@@ -749,6 +742,7 @@ function App() {
             setConnected={setConnected}
             updateChainPixel={updateChainPixel}
             setOnViewOnly={setOnViewOnly}
+            loadChainPixels={loadChainPixels}
           />
         </>
       )}

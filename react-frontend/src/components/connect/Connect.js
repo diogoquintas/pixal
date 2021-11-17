@@ -29,6 +29,7 @@ export default function Connect({
   setConnected,
   updateChainPixel,
   setOnViewOnly,
+  loadChainPixels,
 }) {
   const [connecting, setConnecting] = useState(false);
   const [connectingAsViewer, setConnectingAsViewer] = useState(false);
@@ -167,6 +168,7 @@ export default function Connect({
       return;
     }
 
+    loadChainPixels();
     setConnected(true);
   };
 

@@ -39,7 +39,7 @@ export default function HelpDialog(props) {
         <DialogContentText>[Space] - Interact</DialogContentText>
         <DialogTitle>Transactions</DialogTitle>
         <DialogContentText>
-          {`Currently, there's a limit of ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} pixels per transaction, when crossing that limit, it would required more transactions and more gas consumption. This limit could be removed in the future when the network supports bigger payload sizes.`}
+          {`Currently, there's a limit of ${process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION} pixels per transaction, when crossing that limit, it requires more transactions, in other words, more gas consumption.`}
         </DialogContentText>
       </DialogContent>
     </Dialog>

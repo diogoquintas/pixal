@@ -71,32 +71,28 @@ contract Painting is ReentrancyGuard {
         require(x < 400 && y < 400, "Coordinates out of range");
 
         bytes memory pixelId = id(x, y);
-        Details memory pixel = pixels[pixelId];
+        uint256 timesPainted = pixels[pixelId].timesPainted;
 
-        emit PixelPainted(x, y);
-
-        if (pixel.timesPainted > 0) {
-            uint256 expense = price(pixel.timesPainted);
+        if (timesPainted > 0) {
+            uint256 expense = price(timesPainted);
 
             require(
                 funds >= expense && funds - expense >= 0,
                 "Not enough funds"
             );
 
-            payable(pixel.author).transfer((expense * 3) / 4);
+            payable(pixels[pixelId].author).transfer((expense * 3) / 4);
 
-            pixel.timesPainted++;
-            pixel.color = color;
-            pixel.author = msg.sender;
-
-            pixels[pixelId] = pixel;
+            pixels[pixelId].timesPainted++;
+            pixels[pixelId].color = color;
+            pixels[pixelId].author = msg.sender;
 
             return expense;
+        } else {
+            pixels[pixelId] = Details(x, y, 1, color, msg.sender);
+
+            return 0;
         }
-
-        pixels[pixelId] = Details(x, y, 1, color, msg.sender);
-
-        return 0;
     }
 
     /**
@@ -117,9 +113,17 @@ contract Painting is ReentrancyGuard {
                 pixelToPaint.color,
                 funds
             );
+
+            emit PixelPainted(pixelToPaint.x, pixelToPaint.y);
         }
     }
 
+    /**
+     * @dev The listing function.
+     *
+     * It returns a detailed list of pixels in-between the
+     * two points (x0, y0) and (x1, y1).
+     */
     function list(
         uint256 x0,
         uint256 y0,
