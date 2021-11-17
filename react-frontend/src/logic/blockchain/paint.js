@@ -38,7 +38,7 @@ export default function paint({ pixelList, setAlert }) {
       <>
         <p>{`>_Found ${batches.length} transaction${
           batches.length > 1 ? "s" : ""
-        } and they are ready to be sent to the blockchain. Complete the next step in your wallet.`}</p>
+        } and they are ready to be processed on-chain. Complete the next step in your wallet.`}</p>
       </>
     ),
   });

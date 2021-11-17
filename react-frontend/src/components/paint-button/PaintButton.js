@@ -1,6 +1,6 @@
-import { ErrorPre } from "../../App.styles";
 import loadAccount from "../../logic/blockchain/loadAccount";
 import paint from "../../logic/blockchain/paint";
+import ErrorInfo from "../error-info/ErrorInfo";
 import { Control } from "../pixel-list/PixelList.styles";
 
 export default function PaintButton({
@@ -24,14 +24,9 @@ export default function PaintButton({
           await paint({ pixelList, setAlert });
         } catch (err) {
           setAlert({
-            msg: (
-              <>
-                <p>detailed info:</p>
-                <ErrorPre>{err.message}</ErrorPre>
-              </>
-            ),
+            msg: <ErrorInfo>{err.message}</ErrorInfo>,
             title:
-              ">_an error occurred in one of your transactions, please check if your wallet and account are correctly connected.",
+              ">_An error occurred in one of your transactions. Don't worry, your contribution is stored in your device, check your wallet for any error and try again.",
             severity: "error",
           });
           setTransacting(false);
@@ -39,7 +34,7 @@ export default function PaintButton({
       }}
       {...remainingProps}
     >
-      {transacting ? "Processing transaction..." : "Paint"}
+      {transacting ? "Processing transactions..." : "Paint"}
     </Control>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { storageGetPixels, storageUpdatePixels } from "./logic/storage/pixels";
 import Canvas from "./components/canvas/Canvas";
-import { AlertWrapper, ErrorPre, Loading } from "./App.styles";
+import { AlertWrapper, Loading } from "./App.styles";
 import Alert from "@mui/material/Alert";
 import Title from "./components/title/Title";
 import useTimeout from "./logic/useTimeout";
@@ -16,6 +16,7 @@ import getIsMobileDevice from "./logic/isMobileDevice";
 import getName from "./logic/blockchain/getName";
 import getPixel from "./logic/blockchain/getPixel";
 import getPixels from "./logic/blockchain/getPixels";
+import ErrorInfo from "./components/error-info/ErrorInfo";
 
 export const BOARD_SIZE = 400;
 export const MODE = {
@@ -260,12 +261,7 @@ function App() {
       }
     } catch (err) {
       setAlert({
-        msg: (
-          <>
-            <p>detailed info:</p>
-            <ErrorPre>{err.message}</ErrorPre>
-          </>
-        ),
+        msg: <ErrorInfo>{err.message}</ErrorInfo>,
         title: (
           <>
             &gt;_There was an error reading the blockchain data, make sure
@@ -402,8 +398,8 @@ function App() {
           dismissibleTime: 5000,
           title: (
             <>
-              <p>{`>_${name} painted at <${x}, ${y}> in the color ${color} 🎨`}</p>
-              <p>{`Current pixel price is ${price} ETH`}</p>
+              <p>{`>_${name} painted a pixel at <${x}, ${y}> in ${color}.`}</p>
+              <p>{`Current pixel price is at ${price} ETH.`}</p>
             </>
           ),
         });

@@ -8,9 +8,9 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import { ErrorPre } from "../../App.styles";
 import Help from "../help/Help";
 import { ConnectButton, ViewButton, ButtonWrapper } from "./Connect.styles";
+import ErrorInfo from "../error-info/ErrorInfo";
 
 export const CHAIN_PARAMS = {
   chainId: process.env.REACT_APP_CHAIN_ID,
@@ -37,12 +37,7 @@ export default function Connect({
 
   const setErrorAlert = ({ err, title }) => {
     setAlert({
-      msg: (
-        <>
-          <p>detailed info:</p>
-          <ErrorPre>{err.message}</ErrorPre>
-        </>
-      ),
+      msg: <ErrorInfo>{err.message}</ErrorInfo>,
       title,
       severity: "error",
     });
@@ -84,10 +79,18 @@ export default function Connect({
       window.web3 = new Web3(provider);
       await loadChainInfo();
       setOnViewOnly(true);
-    } catch {
-      setShowWalletModal(true);
+    } catch (err) {
+      setErrorAlert({
+        err,
+        title: (
+          <>
+            &gt;_There was an error connecting to your account, make sure you
+            have an account selected
+          </>
+        ),
+      });
+      setConnecting(false);
       setConnectingAsViewer(false);
-
       return;
     }
   };
