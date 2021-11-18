@@ -12,7 +12,7 @@ import Map from "./components/map/Map";
 import { MIN_SIZE } from "./components/size-picker/SizePicker";
 import { AlertTitle } from "@mui/material";
 import getIsValidColor from "./logic/isValidColor";
-import isMobileDevice from "./logic/isMobileDevice";
+import getIsMobileDevice from "./logic/isMobileDevice";
 import getName from "./logic/blockchain/getName";
 import getPixel from "./logic/blockchain/getPixel";
 import getPixels from "./logic/blockchain/getPixels";
@@ -72,6 +72,7 @@ function App() {
   const names = useRef({});
   const pixelsToLoad = useRef([]);
   const localPixelsRef = useRef({});
+  const isMobileDevice = useRef(getIsMobileDevice);
 
   const findName = async (address) => {
     names.current[address] = {
@@ -173,7 +174,7 @@ function App() {
       );
     }
 
-    if (isMobileDevice()) return;
+    if (isMobileDevice.current) return;
 
     if (currentMode.current === MODE.paint) {
       ctx.fillStyle = color.current;

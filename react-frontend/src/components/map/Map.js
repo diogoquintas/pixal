@@ -207,7 +207,7 @@ const MouseController = ({
               <span>
                 {names.current[chainInfo?.author]?.name ??
                   getShortAddress(chainInfo?.author) ??
-                  "0x"}
+                  "-"}
               </span>
             </AddressColumn>
           </Row>
