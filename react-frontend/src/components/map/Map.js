@@ -1,11 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { forwardRef, useEffect, useRef, useState } from "react";
-import { BOARD_SIZE, insideInterval } from "../../App";
+import { BOARD_SIZE } from "../../App";
 import useViewport from "../../logic/useViewport";
 import { mobile } from "../../styles/media";
-import { getPixelPrice } from "../pixel-list/PixelList";
 import {
-  Coordinates,
   Image,
   MapWrapper,
   Marker,
@@ -14,12 +12,19 @@ import {
   CoordinatesWrapper,
   InfoButton,
   InfoButtons,
-  InfoBlock,
+  Heading,
+  Row,
+  DetailsWrapper,
+  AddressColumn,
 } from "./Map.styles";
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
 import { MODE } from "../../App";
-import Share from "../icons/Share";
+import isMobileDevice from "../../logic/isMobileDevice";
+import copyToClipboard from "../../logic/copyToClipboard";
+import getPriceInEth from "../../logic/blockchain/getPriceInEth";
+import getShortAddress from "../../logic/blockchain/getShortAddress";
+import Copy from "../icons/Copy";
 
 const MouseController = ({
   position,
@@ -30,19 +35,18 @@ const MouseController = ({
   canvasRef,
   currentMode,
   mode,
-  isMobileDevice,
   names,
   setAlert,
   selected,
   setSelected,
   loading,
+  hasPixels,
 }) => {
   const [mouseCoordinates, setMouseCoordinates] = useState();
-  const coordinates = isMobileDevice ? selected : selected ?? mouseCoordinates;
 
   useEffect(() => {
     function handleMouseMove(event) {
-      if (isMobileDevice) return;
+      if (isMobileDevice()) return;
 
       position.current.mouseX = event.clientX;
       position.current.mouseY = event.clientY;
@@ -109,83 +113,106 @@ const MouseController = ({
   if (loading && ready)
     return (
       <InfoWrapper>
-        <InfoBlock>
-          <p>SCANNING CHAIN FOR PIXELS</p>
-        </InfoBlock>
+        <p>SCANNING CHAIN FOR PIXELS</p>
       </InfoWrapper>
     );
 
-  if (!coordinates || !ready) return null;
+  if (!ready) return null;
 
-  const { x, y } = coordinates;
+  const { x, y } = selected ?? {};
   const chainInfo = chainPixels.current?.[`${x}-${y}`];
 
   return (
-    <InfoWrapper>
+    <InfoWrapper hasPixels={hasPixels}>
+      {mouseCoordinates && (
+        <CoordinatesWrapper>
+          <Heading>pixels</Heading>
+          <Row>
+            <span>x:</span>
+            <span>{mouseCoordinates.x}</span>
+          </Row>
+          <Row>
+            <span>y:</span>
+            <span>{mouseCoordinates.y}</span>
+          </Row>
+        </CoordinatesWrapper>
+      )}
       {selected && (
-        <InfoButtons>
-          <InfoButton
-            title="Share this pixel"
-            aria-label="Share this pixel"
-            onClick={() => {
-              const url = `${window.location.origin}?x=${x}&y=${y}&x0=${position.current.xMin}&y0=${position.current.yMin}&zoom=${position.current.zoom}`;
+        <DetailsWrapper>
+          <Heading>
+            <span>selected</span>
+            <InfoButtons>
+              <InfoButton
+                title="Share this pixel"
+                aria-label="Share this pixel"
+                onClick={() => {
+                  const url = `${window.location.origin}?x=${x}&y=${y}&x0=${position.current.xMin}&y0=${position.current.yMin}&zoom=${position.current.zoom}`;
 
-              if (
-                navigator.clipboard &&
-                typeof navigator.clipboard.writeText === "function"
-              ) {
-                navigator.clipboard.writeText(url);
-              } else {
-                const text = document.createElement("textarea");
-
-                document.body.appendChild(text);
-
-                text.innerText = url;
-                text.select();
-
-                document.execCommand("copy");
-                document.body.removeChild(text);
-              }
-
-              setAlert({
-                severity: "success",
-                dismissibleTime: 3000,
-                title: (
-                  <p>Link copied to clipboard. Share it with your friends!</p>
-                ),
-              });
-            }}
-          >
-            <Share />
-          </InfoButton>
-          <InfoButton
-            title="Close"
-            aria-label="Close"
-            onClick={() => setSelected(undefined)}
-          >
-            [x]
-          </InfoButton>
-        </InfoButtons>
+                  copyToClipboard(url);
+                  setAlert({
+                    severity: "success",
+                    dismissibleTime: 3000,
+                    title: (
+                      <p>
+                        Link copied to clipboard. Share it with your friends!
+                      </p>
+                    ),
+                  });
+                }}
+              >
+                share
+              </InfoButton>
+              <InfoButton
+                title="Close"
+                aria-label="Close"
+                onClick={() => setSelected(undefined)}
+              >
+                x
+              </InfoButton>
+            </InfoButtons>
+          </Heading>
+          <Row>
+            <span>x:</span>
+            <span>{x}</span>
+          </Row>
+          <Row>
+            <span>y:</span>
+            <span>{y}</span>
+          </Row>
+          <Row>
+            <span>times painted:</span>
+            <span>{chainInfo?.timesPainted ?? 0}</span>
+          </Row>
+          <Row>
+            <span>price:</span>
+            <span>{`${getPriceInEth(chainInfo?.timesPainted ?? 0)} ETH`}</span>
+          </Row>
+          <Row>
+            <span>author:</span>
+            <AddressColumn>
+              {chainInfo?.author && (
+                <button
+                  onClick={() => {
+                    copyToClipboard(chainInfo.author);
+                    setAlert({
+                      severity: "success",
+                      dismissibleTime: 3000,
+                      title: <p>Address copied to clipboard.</p>,
+                    });
+                  }}
+                >
+                  <Copy />
+                </button>
+              )}
+              <span>
+                {names.current[chainInfo?.author]?.name ??
+                  getShortAddress(chainInfo?.author) ??
+                  "0x"}
+              </span>
+            </AddressColumn>
+          </Row>
+        </DetailsWrapper>
       )}
-      {chainInfo && (
-        <InfoBlock>
-          <p>{`${chainInfo.timesPainted} x PAINTED`}</p>
-          <p>{`price=${window.web3.utils.fromWei(
-            `${getPixelPrice(chainInfo.timesPainted)}`
-          )} ETH`}</p>
-          <p>{`author=${
-            names.current[chainInfo.author]?.name ?? chainInfo.author
-          }`}</p>
-        </InfoBlock>
-      )}
-      <CoordinatesWrapper>
-        <Coordinates
-          color={chainInfo?.color}
-          isOutside={!insideInterval(x) || !insideInterval(y)}
-        >
-          <span>{`<${x}, ${y}>`}</span>
-        </Coordinates>
-      </CoordinatesWrapper>
     </InfoWrapper>
   );
 };
@@ -305,16 +332,16 @@ const Map = forwardRef(
       canvasRef,
       currentMode,
       mode,
-      isMobileDevice,
       names,
       setAlert,
       selected,
       setSelected,
       loading,
+      hasPixels,
     },
     ref
   ) => {
-    const [mapOpen, setMapOpen] = useState(true);
+    const [mapOpen, setMapOpen] = useState(false);
 
     const isMobile = useViewport(mobile);
 
@@ -329,12 +356,12 @@ const Map = forwardRef(
           canvasRef={canvasRef}
           currentMode={currentMode}
           mode={mode}
-          isMobileDevice={isMobileDevice}
           names={names}
           setAlert={setAlert}
           selected={selected}
           setSelected={setSelected}
           loading={loading}
+          hasPixels={hasPixels}
         />
         {isMobile && ready && (
           <MapButton variant="outlined" onClick={() => setMapOpen(!mapOpen)}>
@@ -345,10 +372,9 @@ const Map = forwardRef(
           css={
             isMobile &&
             css`
-              top: 4rem;
-              left: 1rem;
               width: calc(100% - 2rem);
-              padding-top: 50%;
+              height: 0;
+              padding-top: 100%;
               transform: translateX(${mapOpen ? 0 : "-150%"});
               transition: ease transform 150ms;
             `

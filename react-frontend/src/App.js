@@ -7,16 +7,17 @@ import Title from "./components/title/Title";
 import useTimeout from "./logic/useTimeout";
 import Controls from "./components/controls/Controls";
 import Connect from "./components/connect/Connect";
-import PixelList, { getPixelPrice } from "./components/pixel-list/PixelList";
+import PixelList from "./components/pixel-list/PixelList";
 import Map from "./components/map/Map";
 import { MIN_SIZE } from "./components/size-picker/SizePicker";
 import { AlertTitle } from "@mui/material";
 import getIsValidColor from "./logic/isValidColor";
-import getIsMobileDevice from "./logic/isMobileDevice";
+import isMobileDevice from "./logic/isMobileDevice";
 import getName from "./logic/blockchain/getName";
 import getPixel from "./logic/blockchain/getPixel";
 import getPixels from "./logic/blockchain/getPixels";
 import ErrorInfo from "./components/error-info/ErrorInfo";
+import getPriceInEth from "./logic/blockchain/getPriceInEth";
 
 export const BOARD_SIZE = 400;
 export const MODE = {
@@ -42,7 +43,6 @@ function App() {
   const [canvasReady, setCanvasReady] = useState(false);
   const [localPixels, setLocalPixels] = useState({});
   const [stateChainPixels, setStateChainPixels] = useState({});
-  const [isMobileDevice] = useState(getIsMobileDevice);
   const [selected, setSelected] = useState();
   const [onViewOnly, setOnViewOnly] = useState(false);
   const [connected, setConnected] = useState(false);
@@ -159,23 +159,21 @@ function App() {
 
     const { x, y } = getPixelCoordinates();
 
-    if (isMobileDevice) {
-      if (selectedCoordinates.current) {
-        const { x, y } = selectedCoordinates.current;
+    if (selectedCoordinates.current) {
+      const { x, y } = selectedCoordinates.current;
 
-        ctx.strokeStyle = "white";
-        ctx.strokeRect((x - xMin) * zoom, (y - yMin) * zoom, zoom, zoom);
-        ctx.strokeStyle = "black";
-        ctx.strokeRect(
-          (x - xMin) * zoom + 1,
-          (y - yMin) * zoom + 1,
-          zoom - 2,
-          zoom - 2
-        );
-      }
-
-      return;
+      ctx.strokeStyle = "white";
+      ctx.strokeRect((x - xMin) * zoom, (y - yMin) * zoom, zoom, zoom);
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(
+        (x - xMin) * zoom + 1,
+        (y - yMin) * zoom + 1,
+        zoom - 2,
+        zoom - 2
+      );
     }
+
+    if (isMobileDevice()) return;
 
     if (currentMode.current === MODE.paint) {
       ctx.fillStyle = color.current;
@@ -208,25 +206,6 @@ function App() {
         size.current * zoom - 2
       );
     }
-    // } else if (currentMode.current === MODE.move) {
-    //   const targetX = selectedCoordinates.current?.x ?? x;
-    //   const targetY = selectedCoordinates.current?.y ?? y;
-
-    //   ctx.strokeStyle = "white";
-    //   ctx.strokeRect(
-    //     (targetX - xMin) * zoom,
-    //     (targetY - yMin) * zoom,
-    //     zoom,
-    //     zoom
-    //   );
-    //   ctx.strokeStyle = "black";
-    //   ctx.strokeRect(
-    //     (targetX - xMin) * zoom + 1,
-    //     (targetY - yMin) * zoom + 1,
-    //     zoom - 2,
-    //     zoom - 2
-    //   );
-    // }
   };
 
   const loadPixelsWhenPossible = useTimeout({
@@ -388,10 +367,8 @@ function App() {
 
       if (pixelToAlert.current) {
         const { timesPainted, x, y, author, color } = pixelToAlert.current;
-        const price = window.web3.utils.fromWei(
-          `${getPixelPrice(timesPainted)}`
-        );
         const name = names.current[author]?.name ?? author;
+        const price = getPriceInEth(timesPainted);
 
         setAlert({
           severity: "info",
@@ -754,13 +731,13 @@ function App() {
         canvasRef={canvasRef}
         currentMode={currentMode}
         mode={mode}
-        isMobileDevice={isMobileDevice}
         names={names}
         setAlert={setAlert}
         selected={selected}
         setSelected={setSelected}
         onViewOnly={onViewOnly}
         loading={loading}
+        hasPixels={Object.keys(localPixels).length > 0}
       />
     </>
   );

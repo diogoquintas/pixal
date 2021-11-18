@@ -74,8 +74,8 @@ const H1 = styled.h1`
 
 const BetaTag = styled.span`
   position: fixed;
-  bottom: 0;
-  right: 0;
+  bottom: 1rem;
+  right: 1rem;
   color: var(--secondary-color);
   font-size: 12px;
 `;

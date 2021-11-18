@@ -122,8 +122,17 @@ export default function Connect({
               err,
               title: (
                 <>
-                  &gt;_There was an error connecting to your account, make sure
-                  you have an account selected
+                  &gt;_There was an error reading the blockchain data, make sure
+                  you're connected to the correct network. We're on Arbitrum,
+                  follow this link to{" "}
+                  <a
+                    target="_blank"
+                    rel="noreferrer"
+                    href="https://arbitrum.io/bridge-tutorial/"
+                  >
+                    connect to the chain
+                  </a>
+                  .
                 </>
               ),
             });
@@ -161,8 +170,17 @@ export default function Connect({
         err,
         title: (
           <>
-            &gt;_There was an error connecting to your account, make sure you
-            have an account selected
+            &gt;_There was an error reading the blockchain data, make sure
+            you're connected to the correct network. We're on Arbitrum, follow
+            this link to{" "}
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href="https://arbitrum.io/bridge-tutorial/"
+            >
+              connect to the chain
+            </a>
+            .
           </>
         ),
       });

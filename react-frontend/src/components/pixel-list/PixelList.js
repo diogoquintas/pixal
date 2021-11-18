@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { REFERENCE_PRICE } from "../../App";
+import { fromWei } from "../../logic/blockchain/getPriceInEth";
 import Minus from "../icons/Minus";
 import Plus from "../icons/Plus";
 import PaintButton from "../paint-button/PaintButton";
@@ -46,7 +47,7 @@ const PixelItem = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const priceInEth = window.web3.utils.fromWei(`${price}`);
+  const priceInEth = fromWei(price);
 
   return (
     <Item
@@ -222,7 +223,7 @@ export default function PixelList({
           }}
         />
         <Info>
-          <span>{`total=${window.web3.utils.fromWei(`${total}`)} ETH`}</span>
+          <span>{`total=${fromWei(total)} ETH`}</span>
           <span>{`transactions=${Math.ceil(
             pixelList.length / MAX_PIXELS_PER_TRANSACTION
           )}`}</span>

@@ -2,6 +2,7 @@ import styled from "@emotion/styled";
 import { css } from "@emotion/react";
 import { mobileMediaScreen } from "../../styles/media";
 import { Button } from "@mui/material";
+import borderStyles from "../../styles/borderStyles";
 
 export const Image = styled.img`
   position: absolute;
@@ -14,31 +15,60 @@ export const Image = styled.img`
 
 export const CoordinatesWrapper = styled.div`
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  width: 6rem;
+  background-color: black;
+
+  ${borderStyles}
 `;
 
-export const Coordinates = styled.p`
-  color: ${({ isOutside, color }) => {
-    if (color) {
-      return color;
-    }
+export const DetailsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  width: 15rem;
 
-    if (isOutside) {
-      return "red";
-    }
+  ${borderStyles}
 
-    return "white";
-  }};
+  ${mobileMediaScreen} {
+    width: 100%;
+  }
+`;
 
-  ${({ color }) =>
-    color &&
-    css`
-      background-color: ${color};
+export const Row = styled.p`
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+`;
 
-      & > span {
-        filter: invert(100%);
-      }
-    `}
+export const AddressColumn = styled.div`
+  display: flex;
+
+  & > button {
+    background: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    width: 0.8rem;
+    height: 0.8rem;
+    color: white;
+    margin-right: 0.3rem;
+  }
+
+  & > span {
+    max-width: 7rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
+export const Heading = styled.span`
+  border-bottom: 0.1rem solid grey;
+  background: white;
+  color: black;
+  padding: 0.3rem;
+  position: relative;
+  text-transform: uppercase;
 `;
 
 export const MapWrapper = styled.div`
@@ -47,15 +77,13 @@ export const MapWrapper = styled.div`
   right: 1rem;
   width: 15rem;
   height: 15rem;
-  border-radius: 4px;
-  box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%),
-    0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
-  border: 0.1rem solid white;
   transition: ease opacity 150ms;
   opacity: 1;
   cursor: pointer;
   background: black;
   overflow: hidden;
+
+  ${borderStyles}
 
   ${({ canShow }) =>
     !canShow &&
@@ -77,34 +105,39 @@ export const InfoWrapper = styled.div`
   bottom: 1rem;
   right: 17rem;
   display: flex;
-  flex-direction: column;
   align-items: flex-end;
-  background: black;
-  padding: 0.3rem 0.6rem;
-  border: 0.1rem solid white;
-  box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%),
-    0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
-  border-radius: 4px;
-  box-sizing: border-box;
 
-  @media only screen and (max-width: 1136px) {
+  @media only screen and (max-width: 976px) {
     bottom: 17rem;
     right: 1rem;
+    flex-direction: column;
   }
 
   ${mobileMediaScreen} {
     right: unset;
     left: 1rem;
-    bottom: 4rem;
-    max-width: calc(100% - 2rem);
+    bottom: ${({ hasPixels }) => (hasPixels ? "4rem" : "1rem")};
+    width: calc(100% - 2rem);
     align-items: flex-start;
+  }
+
+  & > div:first-of-type:not(:last-of-type) {
+    margin-right: 0.4rem;
+
+    @media only screen and (max-width: 976px) {
+      margin-bottom: 0.4rem;
+    }
   }
 `;
 
 export const MapButton = styled(Button)`
   position: fixed;
-  top: 1rem;
-  right: 19rem;
+  top: 1.6rem;
+  right: 13.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 0;
+  padding: 0;
 
   & > svg {
     height: 1.5rem;
@@ -113,10 +146,13 @@ export const MapButton = styled(Button)`
 
 export const InfoButtons = styled.div`
   display: flex;
-  width: 100%;
   justify-content: flex-end;
   align-items: center;
-  margin-bottom: 0.3rem;
+  margin-bottom: 1rem;
+  position: absolute;
+  top: 0;
+  right: 0.4rem;
+  height: 100%;
 `;
 
 export const InfoButton = styled.button`
@@ -126,15 +162,13 @@ export const InfoButton = styled.button`
   margin: 0;
   border: 0;
   cursor: pointer;
-  font-size: 1.5rem;
-
-  & > svg {
-    width: 1rem;
-    height: 1rem;
-  }
+  font-size: 1rem;
+  border: 0.1rem solid rgba(255, 255, 255, 0.5);
+  padding: 0 0.3rem;
+  background: black;
 
   &:first-of-type {
-    margin-right: 0.3rem;
+    margin-right: 0.4rem;
   }
 `;
 
