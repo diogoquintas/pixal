@@ -44,7 +44,6 @@ function App() {
   const [localPixels, setLocalPixels] = useState({});
   const [stateChainPixels, setStateChainPixels] = useState({});
   const [selected, setSelected] = useState();
-  const [onViewOnly, setOnViewOnly] = useState(false);
   const [connected, setConnected] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
 
@@ -701,7 +700,6 @@ function App() {
               setTransacting={setTransacting}
               transacting={transacting}
               setAlert={setAlert}
-              onViewOnly={onViewOnly}
               loading={loading}
             />
           )}
@@ -714,7 +712,6 @@ function App() {
             setAlert={setAlert}
             setConnected={setConnected}
             updateChainPixel={updateChainPixel}
-            setOnViewOnly={setOnViewOnly}
             loadChainPixels={loadChainPixels}
           />
         </>
@@ -735,7 +732,6 @@ function App() {
         setAlert={setAlert}
         selected={selected}
         setSelected={setSelected}
-        onViewOnly={onViewOnly}
         loading={loading}
         hasPixels={Object.keys(localPixels).length > 0}
         updateMarker={updateMarker}

@@ -9,8 +9,9 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Help from "../help/Help";
-import { ConnectButton, ViewButton, ButtonWrapper } from "./Connect.styles";
+import { ConnectButton, ButtonWrapper } from "./Connect.styles";
 import ErrorInfo from "../error-info/ErrorInfo";
+import isMobileDevice from "../../logic/isMobileDevice";
 
 export const CHAIN_PARAMS = {
   chainId: process.env.REACT_APP_CHAIN_ID,
@@ -28,11 +29,9 @@ export default function Connect({
   setAlert,
   setConnected,
   updateChainPixel,
-  setOnViewOnly,
   loadChainPixels,
 }) {
   const [connecting, setConnecting] = useState(false);
-  const [connectingAsViewer, setConnectingAsViewer] = useState(false);
   const [showWalletModal, setShowWalletModal] = useState(false);
 
   const setErrorAlert = ({ err, title }) => {
@@ -51,46 +50,26 @@ export default function Connect({
       const provider = window.ethereum;
 
       if (!window.ethereum) {
-        throw new Error("no ethereum injected");
+        if (isMobileDevice()) {
+          window
+            .open(
+              `metamask://${process.env.REACT_APP_METAMASK_DEEPLINK}`,
+              "_blank"
+            )
+            .focus();
+        } else {
+          throw new Error("no ethereum injected");
+        }
       } else {
         await provider.enable();
       }
 
       window.web3 = new Web3(provider);
       await loadChainInfo();
-      setOnViewOnly(false);
     } catch {
       setShowWalletModal(true);
       setConnecting(false);
 
-      return;
-    }
-  };
-
-  const connectAsViewer = async () => {
-    setAlert(undefined);
-    setConnectingAsViewer(true);
-
-    try {
-      const provider = new Web3.providers.HttpProvider(
-        process.env.REACT_APP_INFURA_ENDPOINT
-      );
-
-      window.web3 = new Web3(provider);
-      await loadChainInfo();
-      setOnViewOnly(true);
-    } catch (err) {
-      setErrorAlert({
-        err,
-        title: (
-          <>
-            &gt;_There was an error connecting to your account, make sure you
-            have an account selected
-          </>
-        ),
-      });
-      setConnecting(false);
-      setConnectingAsViewer(false);
       return;
     }
   };
@@ -137,7 +116,7 @@ export default function Connect({
               ),
             });
             setConnecting(false);
-            setConnectingAsViewer(false);
+
             return;
           }
         }
@@ -157,7 +136,7 @@ export default function Connect({
         ),
       });
       setConnecting(false);
-      setConnectingAsViewer(false);
+
       return;
     }
 
@@ -185,7 +164,7 @@ export default function Connect({
         ),
       });
       setConnecting(false);
-      setConnectingAsViewer(false);
+
       return;
     }
 
@@ -196,35 +175,20 @@ export default function Connect({
   return (
     <>
       <ButtonWrapper>
-        <ConnectButton
-          variant="outlined"
-          loading={connecting}
-          onClick={connect}
-        >
+        <ConnectButton loading={connecting} onClick={connect}>
           Enter with your wallet
         </ConnectButton>
-        <ViewButton
-          variant="outlined"
-          loading={connectingAsViewer}
-          onClick={connectAsViewer}
-        >
-          Enter as a viewer
-        </ViewButton>
         <Help />
       </ButtonWrapper>
       <Dialog open={showWalletModal}>
         <DialogTitle>Please install a wallet</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            We recommend you use{" "}
+            Currently, we support{" "}
             <a target="_blank" rel="noreferrer" href="https://metamask.io/">
               Metamask
             </a>
             .{" "}
-          </DialogContentText>
-          <DialogContentText>
-            If your browser does not support metamask or you're using a mobile
-            device you can enter as a viewer.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

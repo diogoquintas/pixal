@@ -78,7 +78,6 @@ export default function PixelList({
   setTransacting,
   transacting,
   setAlert,
-  onViewOnly,
 }) {
   const [open, setOpen] = useState(false);
   const [deleteQueue, setDeleteQueue] = useState([]);
@@ -195,7 +194,6 @@ export default function PixelList({
           transacting={transacting}
           setTransacting={setTransacting}
           setAlert={setAlert}
-          onViewOnly={onViewOnly}
         />
       </ControlsWrapper>
       <ListWrapper ref={listRef} open={open}>

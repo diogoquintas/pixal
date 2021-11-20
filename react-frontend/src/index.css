@@ -64,6 +64,11 @@ p {
   cursor: disabled;
 }
 
+.MuiLoadingButton-root {
+  border-color: var(--secondary-color) !important;
+  background-color: var(--secondary-color) !important;
+}
+
 .MuiTextField-root > .MuiInputBase-root {
   color: var(--secondary-color);
 }
