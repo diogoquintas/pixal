@@ -684,7 +684,6 @@ function App() {
             setMode={setMode}
             mode={mode}
             canvasReady={canvasReady}
-            updateMarker={updateMarker}
             loading={loading}
           />
           <Controls
@@ -739,6 +738,7 @@ function App() {
         onViewOnly={onViewOnly}
         loading={loading}
         hasPixels={Object.keys(localPixels).length > 0}
+        updateMarker={updateMarker}
       />
     </>
   );

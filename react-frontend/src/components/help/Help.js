@@ -15,22 +15,15 @@ export default function Help() {
       </HelpButton>
       <Dialog open={open} onClose={() => setOpen(false)}>
         <DialogContent>
-          <DialogTitle>Experimental version</DialogTitle>
-          <DialogContentText>
-            This interface is currently on an early experimental version. We're
-            working out some compatibility issues across devices and browsers as
-            well as different wallets. For now, we recommend you to access the
-            application in a desktop using Chrome/Brave with the Metamask
-            extension.
-          </DialogContentText>
           <DialogTitle>What is this?</DialogTitle>
           <DialogContentText>
-            This is an interactive painting. It is a square which measures
-            400x400 pixels. Every pixel can be painted, selecting a specific
-            color.{" "}
+            This is an interactive painting for everyone. It is a square canvas
+            which measures 400x400 pixels. Every pixel can be painted, selecting
+            a specific color.{" "}
           </DialogContentText>
           <DialogContentText>
-            The painting is stored and distributed by the{" "}
+            The cool part is that the canvas is yours, it's out there,
+            distributed, more specifically, in the{" "}
             <a href="https://ethereum.org/" target="_blank" rel="noreferrer">
               Ethereum blockchain
             </a>
@@ -91,15 +84,22 @@ export default function Help() {
             it exists) will receive three quarters of the amount payed to
             re-paint the pixel.
           </DialogContentText>
-          <DialogTitle>remember, wagmi. the canvas is yours!</DialogTitle>
+          <DialogTitle>Experimental version</DialogTitle>
+          <DialogContentText>
+            This interface is currently on an early experimental version. We're
+            working out some compatibility issues across devices and browsers as
+            well as different wallets. For now, we recommend you to access the
+            application in a desktop using Chrome/Brave with the Metamask
+            extension.
+          </DialogContentText>
           <DialogTitle>
-            {" "}
+            any question, reach out to us on{" "}
             <a
               href="https://twitter.com/pixalproject"
               target="_blank"
               rel="noreferrer"
             >
-              Twitter
+              twitter
             </a>
           </DialogTitle>
         </DialogContent>

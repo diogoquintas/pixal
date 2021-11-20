@@ -112,7 +112,20 @@ const MouseController = ({
 
   if (loading && ready)
     return (
-      <InfoWrapper>
+      <InfoWrapper isLoading>
+        {mouseCoordinates && (
+          <CoordinatesWrapper>
+            <Heading>mouse</Heading>
+            <Row>
+              <span>x:</span>
+              <span>{mouseCoordinates.x}</span>
+            </Row>
+            <Row>
+              <span>y:</span>
+              <span>{mouseCoordinates.y}</span>
+            </Row>
+          </CoordinatesWrapper>
+        )}
         <p>SCANNING CHAIN FOR PIXELS</p>
       </InfoWrapper>
     );
@@ -126,7 +139,7 @@ const MouseController = ({
     <InfoWrapper hasPixels={hasPixels}>
       {mouseCoordinates && (
         <CoordinatesWrapper>
-          <Heading>pixels</Heading>
+          <Heading>mouse</Heading>
           <Row>
             <span>x:</span>
             <span>{mouseCoordinates.x}</span>
@@ -223,6 +236,7 @@ function MapImage({
   onClick,
   markerRef,
   imageRef,
+  updateMarker,
   ...remainingProps
 }) {
   const [loaded, setLoaded] = useState(false);
@@ -230,10 +244,47 @@ function MapImage({
 
   const previousPosition = useRef();
 
+  useEffect(() => {
+    if (!loaded) return;
+
+    updateMarker();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded]);
+
   return (
     <MapWrapper
       canShow={loaded}
       onMouseLeave={() => {
+        setIsDragging(false);
+        previousPosition.current = undefined;
+      }}
+      onMouseMove={(event) => {
+        if (isDragging && previousPosition.current) {
+          const alphaX = event.clientX - previousPosition.current.x;
+          const alphaY = event.clientY - previousPosition.current.y;
+
+          const nextTop = markerRef.current.offsetTop + alphaY;
+          const nextLeft = markerRef.current.offsetLeft + alphaX;
+
+          markerRef.current.style.top = `${nextTop}px`;
+          markerRef.current.style.left = `${nextLeft}px`;
+
+          const rect = imageRef.current.getBoundingClientRect();
+
+          const x = Math.floor((alphaX * BOARD_SIZE) / rect.width);
+          const y = Math.floor((alphaY * BOARD_SIZE) / rect.height);
+          const canvasX = x * position.current.zoom;
+          const canvasY = y * position.current.zoom;
+
+          updatePosition(canvasX, canvasY);
+
+          previousPosition.current = {
+            x: event.clientX,
+            y: event.clientY,
+          };
+        }
+      }}
+      onMouseUp={() => {
         setIsDragging(false);
         previousPosition.current = undefined;
       }}
@@ -280,40 +331,6 @@ function MapImage({
             y: event.clientY,
           };
         }}
-        onMouseMove={(event) => {
-          if (isDragging && previousPosition.current) {
-            const alphaX = event.clientX - previousPosition.current.x;
-            const alphaY = event.clientY - previousPosition.current.y;
-
-            const nextTop = markerRef.current.offsetTop + alphaY;
-            const nextLeft = markerRef.current.offsetLeft + alphaX;
-
-            markerRef.current.style.top = `${nextTop}px`;
-            markerRef.current.style.left = `${nextLeft}px`;
-
-            const rect = imageRef.current.getBoundingClientRect();
-
-            const x = Math.floor((alphaX * BOARD_SIZE) / rect.width);
-            const y = Math.floor((alphaY * BOARD_SIZE) / rect.height);
-            const canvasX = x * position.current.zoom;
-            const canvasY = y * position.current.zoom;
-
-            updatePosition(canvasX, canvasY);
-
-            previousPosition.current = {
-              x: event.clientX,
-              y: event.clientY,
-            };
-          }
-        }}
-        onMouseUp={() => {
-          setIsDragging(false);
-          previousPosition.current = undefined;
-        }}
-        onMouseLeave={() => {
-          setIsDragging(false);
-          previousPosition.current = undefined;
-        }}
       />
     </MapWrapper>
   );
@@ -338,6 +355,7 @@ const Map = forwardRef(
       setSelected,
       loading,
       hasPixels,
+      updateMarker,
     },
     ref
   ) => {
@@ -384,6 +402,7 @@ const Map = forwardRef(
           markerRef={markerRef}
           imageRef={ref}
           onClick={() => setMapOpen(false)}
+          updateMarker={updateMarker}
         />
       </>
     );

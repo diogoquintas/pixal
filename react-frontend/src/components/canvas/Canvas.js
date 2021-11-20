@@ -49,7 +49,6 @@ const Canvas = forwardRef(
       setMode,
       mode,
       canvasReady,
-      updateMarker,
       loading,
     },
     ref
@@ -76,7 +75,6 @@ const Canvas = forwardRef(
         position.current = getCanvasPosition(position.current);
 
         setCanvasReady(true);
-        updateMarker();
       }
 
       window.addEventListener("resize", resetCanvasPosition);

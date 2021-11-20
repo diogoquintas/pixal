@@ -128,6 +128,16 @@ export const InfoWrapper = styled.div`
       margin-bottom: 0.4rem;
     }
   }
+
+  ${({ isLoading }) =>
+    isLoading &&
+    css`
+      flex-direction: column;
+
+      & > div {
+        margin-bottom: 1rem;
+      }
+    `}
 `;
 
 export const MapButton = styled(Button)`
