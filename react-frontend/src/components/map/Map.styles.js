@@ -41,6 +41,15 @@ export const Row = styled.p`
   padding: 0.5rem;
 `;
 
+export const Color = styled.div`
+  background-color: ${({ color }) => color};
+  color: ${({ color }) => color};
+
+  & > span {
+    filter: invert(100%);
+  }
+`;
+
 export const AddressColumn = styled.div`
   display: flex;
 

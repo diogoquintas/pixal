@@ -35,6 +35,7 @@ export default function PaintButton({
       {...remainingProps}
     >
       {transacting ? "Processing transactions..." : "Paint"}
+      {onViewOnly && " (view only)"}
     </Control>
   );
 }

@@ -72,7 +72,7 @@ function App() {
   const names = useRef({});
   const pixelsToLoad = useRef([]);
   const localPixelsRef = useRef({});
-  const isMobileDevice = useRef(getIsMobileDevice);
+  const isMobileDevice = useRef(getIsMobileDevice());
 
   const findName = async (address) => {
     names.current[address] = {

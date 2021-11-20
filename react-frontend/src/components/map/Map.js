@@ -16,6 +16,7 @@ import {
   Row,
   DetailsWrapper,
   AddressColumn,
+  Color,
 } from "./Map.styles";
 import MapIcon from "../icons/Map";
 import { css } from "@emotion/react";
@@ -200,6 +201,14 @@ const MouseController = ({
             <span>price:</span>
             <span>{`${getPriceInEth(chainInfo?.timesPainted ?? 0)} ETH`}</span>
           </Row>
+          {chainInfo?.color && (
+            <Row>
+              <span>color:</span>
+              <Color color={chainInfo.color}>
+                <span>{chainInfo.color}</span>
+              </Color>
+            </Row>
+          )}
           <Row>
             <span>author:</span>
             <AddressColumn>

@@ -17,16 +17,25 @@ struct Details {
     address author;
 }
 
-/**
- * @dev A two dimensional painting, each pixel can have a specific color.
- *
- *  The painting size is 400x400 pixels.
- *  The first time a pixel is painted is free but to re-paint a pixel
- *  it is required to pay the respective `price`.
+/* 
+    @@@@@@@@@@@@@@      @@@@@@@@@@@@@/    ,@@@@@      @@@@@         @@@@@         @@@@@             
+    @@@@      %@@@@/        &@@@@           @@@@@   @@@@@          @@@@@@@        @@@@@             
+    @@@@       @@@@@        &@@@@            @@@@@ @@@@@          @@@@ @@@@       @@@@@             
+    @@@@       @@@@@        &@@@@              @@@@@@@(          @@@@  @@@@&      @@@@@             
+    @@@@@@@@@@@@@@          &@@@@              @@@@@@@          @@@@@   @@@@      @@@@@             
+    @@@@((((*               &@@@@             @@@@@@@@@        (@@@@@@@@@@@@@     @@@@@             
+    @@@@                    &@@@@           ,@@@@*  @@@@@      @@@@@@@@@@@@@@@    @@@@@             
+    @@@@                @@@@@@@@@@@@@/     @@@@@     @@@@@    @@@@*       @@@@@   @@@@@@@@@@@@@@@@  
+    @@@@                @@@@@@@@@@@@@/    @@@@@       @@@@@@ @@@@@         @@@@@  @@@@@@@@@@@@@@@@
+
+    A two dimensional painting with 400x400 pixels, each pixel can have a specific color.
+    Painting a pixel is free for the first time. 
+    The price increases each time the pixel is painted.
  */
-contract Painting is ReentrancyGuard {
+contract Pixal is ReentrancyGuard {
+    uint256 constant CANVAS_SIZE = 400;
+
     address private owner;
-    uint256 constant basePrice = 0.00001 ether;
 
     mapping(bytes => Details) pixels;
 
@@ -52,15 +61,15 @@ contract Painting is ReentrancyGuard {
             return 100000 ether;
         }
 
-        return basePrice * 10**timesPainted;
+        return 0.00001 ether * 10**timesPainted;
     }
 
     /**
      * @dev Internal paint function, called by 'paint'.
      *
-     * Update the pixel information and pay the previous author when the pixel is already painted (position > 0).
-     * Otherwise, create the new pixel.
-     * Returns the spent funds.
+     *  Update a pixel details and pays the previous author, if any.
+     *  Otherwise, instantiate the new pixel details.
+     *  Returns the spent funds on this action.
      */
     function paintPixel(
         uint16 x,
@@ -68,7 +77,7 @@ contract Painting is ReentrancyGuard {
         bytes3 color,
         uint256 funds
     ) internal returns (uint256) {
-        require(x < 400 && y < 400, "Coordinates out of range");
+        require(x < CANVAS_SIZE && y < CANVAS_SIZE, "Coordinates out of range");
 
         bytes memory pixelId = id(x, y);
         uint256 timesPainted = pixels[pixelId].timesPainted;
@@ -132,7 +141,7 @@ contract Painting is ReentrancyGuard {
     ) public view virtual returns (Details[] memory) {
         require(x1 > x0 && y1 > y0);
         require(x0 >= 0 && y0 >= 0);
-        require(x1 <= 400 && y1 <= 400);
+        require(x1 <= CANVAS_SIZE && y1 <= CANVAS_SIZE);
 
         Details[] memory result = new Details[]((x1 - x0) * (y1 - y0));
         uint256 index = 0;
