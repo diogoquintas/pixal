@@ -2,7 +2,7 @@ const MAX_PIXELS_PER_TRANSACTION = Number(
   process.env.REACT_APP_MAX_PIXELS_PER_TRANSACTION
 );
 
-export default function paint({ pixelList, setAlert }) {
+export default async function paint({ pixelList, setAlert }) {
   const pixels = pixelList.map(({ x, y, color }) => [
     x,
     y,
@@ -36,6 +36,25 @@ export default function paint({ pixelList, setAlert }) {
     dismissibleTime: 6000,
     title: (
       <>
+        <p>{`>_Estimating gas costs for your transaction(s).`}</p>
+      </>
+    ),
+  });
+
+  const estimations = await Promise.all(
+    batches.map((batch) =>
+      window.contract.methods.paint(batch.pixels).estimateGas({
+        from: window.account,
+        value: batch.value.toString(),
+      })
+    )
+  );
+
+  setAlert({
+    severity: "info",
+    dismissibleTime: 6000,
+    title: (
+      <>
         <p>{`>_Found ${batches.length} transaction${
           batches.length > 1 ? "s" : ""
         } and they are ready to be processed on-chain. Complete the next step in your wallet.`}</p>
@@ -44,10 +63,11 @@ export default function paint({ pixelList, setAlert }) {
   });
 
   return Promise.all(
-    batches.map((batch) =>
+    batches.map((batch, index) =>
       window.contract.methods.paint(batch.pixels).send({
         from: window.account,
         value: batch.value.toString(),
+        gas: estimations[index],
       })
     )
   );
