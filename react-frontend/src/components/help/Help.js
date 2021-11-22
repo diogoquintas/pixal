@@ -42,7 +42,7 @@ export default function Help() {
           </DialogContentText>
           <DialogContentText>
             <a
-              href={`${process.env.REACT_APP_CONTRACT_EXPLORER}/address/${process.env.REACT_APP_CONTRACT_ADDRES}`}
+              href={`${process.env.REACT_APP_CONTRACT_EXPLORER}/address/${process.env.REACT_APP_CONTRACT_ADDRESS}`}
               target="_blank"
               rel="noreferrer"
             >

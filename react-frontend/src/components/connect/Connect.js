@@ -52,11 +52,11 @@ export default function Connect({
       if (!window.ethereum) {
         if (isMobileDevice()) {
           window
-            .open(
-              `metamask://${process.env.REACT_APP_METAMASK_DEEPLINK}`,
-              "_blank"
-            )
+            .open(process.env.REACT_APP_METAMASK_DEEPLINK, "_blank")
             .focus();
+
+          setConnecting(false);
+          return;
         } else {
           throw new Error("no ethereum injected");
         }
@@ -184,7 +184,7 @@ export default function Connect({
         <DialogTitle>Please install a wallet</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Currently, we support{" "}
+            For now, we recommend using{" "}
             <a target="_blank" rel="noreferrer" href="https://metamask.io/">
               Metamask
             </a>
