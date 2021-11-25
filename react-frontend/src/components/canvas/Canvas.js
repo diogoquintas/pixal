@@ -7,7 +7,13 @@ import styled from "@emotion/styled";
 import { css } from "@emotion/react";
 import { MODE } from "../../App";
 
-const StyledCanvas = styled.canvas`
+const StyledCanvas = styled("canvas", {
+  shouldForwardProp: (prop) =>
+    prop !== "isMove" &&
+    prop !== "isTransacting" &&
+    prop !== "loading" &&
+    prop !== "disabled",
+})`
   cursor: cell;
   position: fixed;
   top: 0;

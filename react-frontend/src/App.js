@@ -227,7 +227,12 @@ function App() {
     try {
       for (let x0 = 0; x0 < BOARD_SIZE; x0 += squareSize) {
         for (let y0 = 0; y0 < BOARD_SIZE; y0 += squareSize) {
-          getPixels(x0, y0, x0 + squareSize, y0 + squareSize).then(
+          getPixels(
+            x0,
+            y0,
+            Math.min(x0 + squareSize, BOARD_SIZE),
+            Math.min(y0 + squareSize, BOARD_SIZE)
+          ).then(
             (pixels) => {
               pixelsToLoad.current.push(pixels);
               loadPixelsWhenPossible();

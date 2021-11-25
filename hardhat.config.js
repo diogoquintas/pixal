@@ -34,12 +34,17 @@ module.exports = {
     arbTestnet: {
       url: "https://rinkeby.arbitrum.io/rpc",
       chainId: 421611,
-      accounts: accounts,
+      accounts,
     },
     arbitrum: {
       url: "https://arb1.arbitrum.io/rpc",
       chainId: 42161,
-      accounts: accounts,
+      accounts,
+    },
+    mumbai: {
+      url: "https://rpc-mumbai.maticvigil.com",
+      chainId: 80001,
+      accounts,
     },
   },
   gasReporter: {

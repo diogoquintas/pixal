@@ -113,7 +113,7 @@ const MouseController = ({
 
   if (loading && ready)
     return (
-      <InfoWrapper isLoading>
+      <InfoWrapper isLoading key="loading">
         {mouseCoordinates && (
           <CoordinatesWrapper>
             <Heading>mouse</Heading>
@@ -137,7 +137,7 @@ const MouseController = ({
   const chainInfo = chainPixels.current?.[`${x}-${y}`];
 
   return (
-    <InfoWrapper hasPixels={hasPixels}>
+    <InfoWrapper hasPixels={hasPixels} key="loaded">
       {mouseCoordinates && (
         <CoordinatesWrapper>
           <Heading>mouse</Heading>
